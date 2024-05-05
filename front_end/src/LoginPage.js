@@ -4,8 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { Container, TextField, Button, Typography, Box } from '@mui/material';
 
 function LoginPage() {
-  const apiUrl = process.env.local.REACT_APP_API_URL;
-  const apiUrl2 = process.env.production.REACT_APP_API_URL;
   const navigate = useNavigate();
   const { globalUsername, setGlobalUsername } = useUser();
 
@@ -14,6 +12,9 @@ function LoginPage() {
 
   const handleLogin = async (event) => {
     event.preventDefault();
+
+    const apiUrl = process.env.REACT_APP_API_URL;
+    alert(apiUrl);
   
     // Validate username
     if (!username.trim()) {
@@ -45,9 +46,7 @@ function LoginPage() {
       }
     }
     catch (error) {
-        // alert('Network error: Could not connect to server.');
-        alert(apiUrl);
-        alert(apiUrl2);
+        alert('Network error: Could not connect to server.');
     }
   };
 
