@@ -33,19 +33,18 @@ app.add_middleware(
 
 from dotenv import load_dotenv
 load_dotenv()
-
-username = os.getenv('MONGO_USERNAME', 'default_username')
-password = os.getenv('MONGO_PASSWORD', 'default_password')
-cluster_url = os.getenv('MONGO_CLUSTER_URL', 'default_cluster_url')
+username = os.getenv('MONGO_USERNAME')
+password = os.getenv('MONGO_PASSWORD')
+cluster_url = os.getenv('MONGO_CLUSTER_URL')
+if not all([username, password, cluster_url]):
+    raise ValueError("MongoDB connection parameters are not fully configured.")
 uri = f'mongodb+srv://{username}:{password}@{cluster_url}/?retryWrites=true&w=majority&appName=Cluster0'
 client = MongoClient(uri)
-
-try:
-    client.admin.command('ping')
-    print("Successfully pinged")
-except Exception as e:
-    print(e)
-
+# try:
+#     client.admin.command('ping')
+#     print("Successfully pinged")
+# except Exception as e:
+#     print(e)
 db = client.expenses
 
 

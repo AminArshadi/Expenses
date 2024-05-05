@@ -44,8 +44,8 @@ function LoginPage() {
       }
     }
     catch (error) {
-        console.error('Network error:', error);
         alert('Network error: Could not connect to server.');
+        alert(apiUrl);
     }
   };
 
