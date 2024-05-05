@@ -1,3 +1,4 @@
+import os
 import uvicorn
 from datetime import datetime
 from pymongo.mongo_client import MongoClient
@@ -11,20 +12,40 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # or '*' for all origins
+    allow_origins=[
+        "http://localhost:3000",  # Local frontend address
+        "https://expenses-theta.vercel.app"  # Production frontend address
+    ], # or '*' for all origins
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+ 
+# username, password = 'aarsh081', 'Arshadi_80'
+# uri = f'mongodb+srv://{username}:{password}@cluster0.iwqi08x.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
+# client = MongoClient(uri)
+# # try:
+# #     client.admin.command('ping')
+# #     print("Successfully pinged")
+# # except Exception as e:
+# #     print(e)
+# db = client.expenses
 
-username, password = 'aarsh081', 'Arshadi_80'
-uri = f'mongodb+srv://{username}:{password}@cluster0.iwqi08x.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
+from dotenv import load_dotenv
+load_dotenv()
+
+username = os.getenv('MONGO_USERNAME', 'default_username')
+password = os.getenv('MONGO_PASSWORD', 'default_password')
+cluster_url = os.getenv('MONGO_CLUSTER_URL', 'default_cluster_url')
+uri = f'mongodb+srv://{username}:{password}@{cluster_url}/?retryWrites=true&w=majority&appName=Cluster0'
 client = MongoClient(uri)
-# try:
-#     client.admin.command('ping')
-#     print("Successfully pinged")
-# except Exception as e:
-#     print(e)
+
+try:
+    client.admin.command('ping')
+    print("Successfully pinged")
+except Exception as e:
+    print(e)
+
 db = client.expenses
 
 

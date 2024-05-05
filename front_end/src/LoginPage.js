@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Container, TextField, Button, Typography, Box } from '@mui/material';
 
 function LoginPage() {
+  const apiUrl = process.env.REACT_APP_API_URL;
   const navigate = useNavigate();
   const { globalUsername, setGlobalUsername } = useUser();
 
@@ -26,7 +27,7 @@ function LoginPage() {
     }
   
     try {
-      const response = await fetch('http://localhost:8000/verifyCredentials', {
+      const response = await fetch(`${apiUrl}/verifyCredentials`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
