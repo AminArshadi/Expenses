@@ -5,7 +5,7 @@ import { Container, TextField, Button, Typography, Box } from '@mui/material';
 
 function LoginPage() {
   const apiUrl = process.env.local.REACT_APP_API_URL;
-  const apiUrl = process.env.production.REACT_APP_API_URL;
+  const apiUrl2 = process.env.production.REACT_APP_API_URL;
   const navigate = useNavigate();
   const { globalUsername, setGlobalUsername } = useUser();
 
@@ -47,6 +47,7 @@ function LoginPage() {
     catch (error) {
         // alert('Network error: Could not connect to server.');
         alert(apiUrl);
+        alert(apiUrl2);
     }
   };
 
