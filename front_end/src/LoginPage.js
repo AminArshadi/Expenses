@@ -44,7 +44,7 @@ function LoginPage() {
       }
     }
     catch (error) {
-        alert('Network error: Could not connect to server.');
+        // alert('Network error: Could not connect to server.');
         alert(apiUrl);
     }
   };
