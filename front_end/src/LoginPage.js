@@ -13,7 +13,7 @@ function LoginPage() {
   const handleLogin = async (event) => {
     event.preventDefault();
 
-    const apiUrl = "https://expenses-theta.vercel.app";
+    const apiUrl = "https://expenses-theta.vercel.app:8000";
     // const apiUrl = process.env.REACT_APP_API_URL;
     alert(apiUrl);
   
