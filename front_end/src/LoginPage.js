@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { Container, TextField, Button, Typography, Box } from '@mui/material';
 
 function LoginPage() {
-  const apiUrl = process.env.REACT_APP_API_URL;
+  const apiUrl = process.env.local.REACT_APP_API_URL;
+  const apiUrl = process.env.production.REACT_APP_API_URL;
   const navigate = useNavigate();
   const { globalUsername, setGlobalUsername } = useUser();
 
