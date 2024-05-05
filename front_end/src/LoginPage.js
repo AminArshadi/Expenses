@@ -13,7 +13,8 @@ function LoginPage() {
   const handleLogin = async (event) => {
     event.preventDefault();
 
-    const apiUrl = process.env.REACT_APP_API_URL;
+    const apiUrl = "https://expenses-theta.vercel.app";
+    // const apiUrl = process.env.REACT_APP_API_URL;
     alert(apiUrl);
   
     // Validate username
