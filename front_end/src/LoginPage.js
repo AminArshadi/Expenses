@@ -1,21 +1,18 @@
-import React, { useState } from 'react';
 import { useUser } from './UserContext';
+
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, TextField, Button, Typography, Box } from '@mui/material';
 
 function LoginPage() {
   const navigate = useNavigate();
-  const { globalUsername, setGlobalUsername } = useUser();
+  const { setGlobalUsername, apiURL } = useUser();
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = async (event) => {
     event.preventDefault();
-
-    const apiUrl = "https://expenses-theta.vercel.app:8000";
-    // const apiUrl = process.env.REACT_APP_API_URL;
-    alert(apiUrl);
   
     // Validate username
     if (!username.trim()) {
@@ -28,9 +25,9 @@ function LoginPage() {
       alert("Password is required.");
       return;
     }
-  
+    
     try {
-      const response = await fetch(`${apiUrl}/verifyCredentials`, {
+      const response = await fetch(`${apiURL}/verifyCredentials`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })

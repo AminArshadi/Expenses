@@ -1,9 +1,12 @@
+import { useUser } from './UserContext';
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, TextField, Button, Typography, Box } from '@mui/material';
 
 function SignupPage() {
   const navigate = useNavigate();
+  const { apiURL } = useUser();
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -61,7 +64,7 @@ function SignupPage() {
     }
   
     try {
-      const response = await fetch('http://localhost:8000/addUser', {
+      const response = await fetch(`${apiURL}/addUser`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ firstName, lastName, email, username, password })

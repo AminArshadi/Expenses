@@ -1,5 +1,6 @@
 import os
 import uvicorn
+
 from datetime import datetime
 from pymongo.mongo_client import MongoClient
 from pydantic import BaseModel
@@ -13,23 +14,14 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        "*", # '*' for all origins
         "http://localhost:3000",  # Local frontend address
-        "https://expenses-theta.vercel.app"  # Production frontend address
-    ], # or '*' for all origins
+        "https://frontend-app-expenses-1f4540fc6af9.herokuapp.com/"  # Production frontend address
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
- 
-# username, password = 'aarsh081', 'Arshadi_80'
-# uri = f'mongodb+srv://{username}:{password}@cluster0.iwqi08x.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
-# client = MongoClient(uri)
-# # try:
-# #     client.admin.command('ping')
-# #     print("Successfully pinged")
-# # except Exception as e:
-# #     print(e)
-# db = client.expenses
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -68,7 +60,7 @@ class UserInfo(BaseModel):
     email: str
     username: str
     password: str
-    
+
 @app.post("/addUser")
 async def add_user(userInfo: UserInfo):
     firstName, lastName, email, username, password = userInfo.firstName, userInfo.lastName, userInfo.email, userInfo.username, userInfo.password

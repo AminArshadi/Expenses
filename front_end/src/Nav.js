@@ -1,18 +1,16 @@
-import { useNavigate } from 'react-router-dom';
 import './Nav.css';
-import AppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
+
+import { useUser } from './UserContext';
+
+import { AppBar, Toolbar, Typography, Button, Box, Container } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
-import { Box, Container } from '@mui/material';
 
 function Nav() {
-  const navigate = useNavigate();
+  const { globalUsername, setGlobalUsername } = useUser();
 
-  const handleLogout = (event) => {
-    event.preventDefault();
-    navigate('/login');
+  const handleLogout = () => {
+    setGlobalUsername('')
+    alert(`${globalUsername} is now logged out.`)
   }
 
   return (
@@ -26,7 +24,7 @@ function Nav() {
                     <Button color="inherit" component={RouterLink} to="/home" sx={{ mx: 1 }}>Home</Button>
                     <Button color="inherit" component={RouterLink} to="/reports" sx={{ mx: 1 }}>Reports</Button>
                 </Box>
-                <Button color="inherit" component={RouterLink} to="/home" sx={{ mx: 1 }} onClick={handleLogout}>Log out</Button>
+                <Button color="inherit" component={RouterLink} to="/login" sx={{ mx: 1 }} onClick={handleLogout}>Log out</Button>
             </Toolbar>
         </Container>
     </AppBar>

@@ -1,18 +1,20 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Nav from './Nav.js';
 import { useUser } from './UserContext';
+
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { DateTime } from 'luxon';
 import { TextField, Button, MenuItem, Container, Box, FormControl, Select, InputLabel } from '@mui/material';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 
 function HomePage() {
 	const navigate = useNavigate();
-	const { globalUsername, setGlobalUsername } = useUser();
+	const { globalUsername, apiURL } = useUser();
 	
 	const [sign, setSign] = useState('+');
 	const [number, setNumber] = useState(null);
-	const [selectedDate, setSelectedDate] = useState(new Date());
+	const [selectedDate, setSelectedDate] = useState(DateTime.now());
 	const [comments, setComments] = useState('');
 
 	const handleSubmit = async (event) => {
@@ -26,7 +28,7 @@ function HomePage() {
 		let finalNumber = sign === "+" ? number : number * -1;
 
 		try {
-			const response = await fetch('http://localhost:8000/sendTransaction', {
+			const response = await fetch(`${apiURL}/sendTransaction`, {
 				method: 'POST',
 			  	headers: { 'Content-Type': 'application/json' },
 			  	body: JSON.stringify({ globalUsername, finalNumber, selectedDate, comments })
@@ -81,13 +83,14 @@ function HomePage() {
 						/>
 					</div>
 
-					<LocalizationProvider dateAdapter={AdapterDateFns}>
-						<DatePicker
-							label="Date"
-							value={selectedDate}
-							onChange={ (newValue) => { setSelectedDate(newValue) } }
-						/>
-					</LocalizationProvider>
+					<LocalizationProvider dateAdapter={AdapterLuxon}>
+                        <DatePicker
+                            label="Date"
+                            value={selectedDate}
+                            onChange={newValue => setSelectedDate(newValue)}
+                            renderInput={(params) => <TextField {...params} />}
+                        />
+                    </LocalizationProvider>
 
 					<TextField
 						style={{ marginTop: 20 }}
