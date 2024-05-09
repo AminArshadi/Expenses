@@ -3,6 +3,7 @@ import './App.css';
 import LoginPage from './LoginPage.js';
 import SignupPage from './SignupPage.js';
 import HomePage from './HomePage.js';
+import GroupsPage from './GroupsPage.js';
 import ReportsPage from './ReportsPage.js';
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -16,6 +17,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/home" element={<HomePage />} />
+          <Route path="/groups" element={<GroupsPage />} />
           <Route path="/reports" element={<ReportsPage />} />
         </Routes>
       </BrowserRouter>

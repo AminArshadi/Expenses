@@ -4,7 +4,7 @@ import { useUser } from './UserContext';
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DateTime } from 'luxon';
-import { TextField, Button, MenuItem, Container, Box, FormControl, Select, InputLabel } from '@mui/material';
+import { TextField, Autocomplete, Button, MenuItem, Container, Box, FormControl, Select, InputLabel } from '@mui/material';
 import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 
@@ -16,12 +16,26 @@ function HomePage() {
 	const [number, setNumber] = useState(null);
 	const [selectedDate, setSelectedDate] = useState(DateTime.now());
 	const [comments, setComments] = useState('');
+	const [reason, setReason] = useState(null);
+	const reasons = [
+		{value: "gas", label: 'Gas'},
+		{value: "grocery", label: 'Grocery'},
+		{value: "rent", label: 'Rent'},
+		{value: "other", label: 'Other'},
+	]
 
 	const handleSubmit = async (event) => {
 		event.preventDefault();
 
+		// Validation for amount
 		if (!number) {
 			alert("Empty or incorrect amount format: only accepts numbers.");
+			return;
+		}
+
+		// Validation for reason
+		if (!reason) {
+			alert("Select a reason.");
 			return;
 		}
 
@@ -31,7 +45,7 @@ function HomePage() {
 			const response = await fetch(`${apiURL}/sendTransaction`, {
 				method: 'POST',
 			  	headers: { 'Content-Type': 'application/json' },
-			  	body: JSON.stringify({ globalUsername, finalNumber, selectedDate, comments })
+			  	body: JSON.stringify({ globalUsername, finalNumber, selectedDate, reason, comments })
 			});
 	  
 			const data = await response.json();
@@ -91,6 +105,18 @@ function HomePage() {
                             renderInput={(params) => <TextField {...params} />}
                         />
                     </LocalizationProvider>
+
+					<Autocomplete
+						sx={{ mt: 2 }}
+						fullWidth
+						options={reasons}
+						value={reasons.find(option => option.value === reason)}
+						onChange={(event, newValue) => {newValue ? setReason(newValue.value) : setReason(null)}}
+						getOptionLabel={(option) => option.label}
+						renderInput={(params) => (
+							<TextField {...params} required label="Reason" variant="outlined" />
+						)}
+					/>
 
 					<TextField
 						style={{ marginTop: 20 }}

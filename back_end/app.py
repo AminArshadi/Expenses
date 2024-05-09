@@ -76,13 +76,14 @@ class TransactionInfo(BaseModel):
     globalUsername: str
     finalNumber: float
     selectedDate: datetime
+    reason: str
     comments: str
     
 @app.post("/sendTransaction")
 async def add_user(transactionInfo: TransactionInfo):
-    username, amount, date, comments = transactionInfo.globalUsername, transactionInfo.finalNumber, transactionInfo.selectedDate, transactionInfo.comments
+    username, amount, date, reason, comments = transactionInfo.globalUsername, transactionInfo.finalNumber, transactionInfo.selectedDate, transactionInfo.reason, transactionInfo.comments
     collection = db.transaction
-    send_transaction_to_db(collection, username, amount, date, comments)
+    send_transaction_to_db(collection, username, amount, date, reason, comments)
     return JSONResponse(content={"status": "success"}, status_code=200)
 
 
