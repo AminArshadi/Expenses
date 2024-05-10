@@ -2,12 +2,20 @@ import os
 import uvicorn
 
 from datetime import datetime
+from typing import List
 from pymongo.mongo_client import MongoClient
+from dotenv import load_dotenv
 from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from utils.authentication import add_user_to_db, send_transaction_to_db
+from utils.authentication import (
+    add_user_to_db,
+    send_transaction_to_db,
+    add_group_to_db,
+    get_groups_by_username_from_db,
+    get_all_usernames_from_db,
+)
 
 app = FastAPI()
 
@@ -23,7 +31,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from dotenv import load_dotenv
 load_dotenv()
 username = os.getenv('MONGO_USERNAME')
 password = os.getenv('MONGO_PASSWORD')
@@ -39,7 +46,7 @@ client = MongoClient(uri)
 #     print(e)
 db = client.expenses
 
-
+### verifyCredentials ###
 class Credentials(BaseModel):
     username: str
     password: str
@@ -52,8 +59,9 @@ async def verify_credentials(credentials: Credentials):
     if not is_verfied:
         raise HTTPException(detail="Invalid credentials", status_code=400)
     return JSONResponse(content={"status": "success"}, status_code=200)
+######
 
-
+### addUser ###
 class UserInfo(BaseModel):
     firstName: str
     lastName: str
@@ -70,8 +78,9 @@ async def add_user(userInfo: UserInfo):
         raise HTTPException(detail="Username already exists", status_code=400)
     add_user_to_db(collection, firstName, lastName, email, username, password)
     return JSONResponse(content={"status": "success"}, status_code=200)
+######
 
-
+### sendTransaction ###
 class TransactionInfo(BaseModel):
     globalUsername: str
     finalNumber: float
@@ -85,7 +94,45 @@ async def add_user(transactionInfo: TransactionInfo):
     collection = db.transaction
     send_transaction_to_db(collection, username, amount, date, reason, comments)
     return JSONResponse(content={"status": "success"}, status_code=200)
+######
 
+### getGroups ###
+class AdminInfo(BaseModel):
+    globalUsername: str
+    
+@app.post("/getGroups")
+async def get_groups(adminInfo: AdminInfo):
+    username = adminInfo.globalUsername
+    collection = db.users
+    groups = get_groups_by_username_from_db(collection, username)
+    print(username)
+    if len(groups) == 1:
+        groups = groups[0]
+    print(groups)
+    return JSONResponse(content={"status": "success", "groups": groups}, status_code=200)
+######
+
+### getUsers ###
+@app.get("/getUsernames")
+async def get_usernames():
+    collection = db.users
+    usernames = get_all_usernames_from_db(collection)
+    return JSONResponse(content={"status": "success", "usernames": usernames}, status_code=200)
+######
+
+### addGroup ###
+class GroupInfo(BaseModel):
+    group_name: str
+    admin_username: str
+    members_usernames: List[str]
+    
+@app.post("/groups/addGroup")
+async def add_group(groupInfo: GroupInfo):
+    group_name, admin_username, members_usernames = groupInfo.group_name, groupInfo.admin_username, groupInfo.members_usernames
+    groups_collection, users_collection = db.groups, db.users
+    add_group_to_db(groups_collection, users_collection, group_name, admin_username, members_usernames)
+    return JSONResponse(content={"status": "success"}, status_code=200)
+######
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

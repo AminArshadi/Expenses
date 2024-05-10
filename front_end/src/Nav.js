@@ -30,7 +30,7 @@ function Nav() {
                     <Button color="inherit" component={RouterLink} to="/groups" sx={{ mx: 1, textDecoration: isSelected('/groups') }}>Groups</Button>
                     <Button color="inherit" component={RouterLink} to="/reports" sx={{ mx: 1, textDecoration: isSelected('/reports') }}>Reports</Button>
                 </Box>
-                <Button variant="outlined" color="secondary" component={RouterLink} to="/login" sx={{ mx: 1, color:'white', borderColor:'white' }} onClick={handleLogout}>Log out</Button>
+                <Button variant="outlined" color="secondary" component={RouterLink} to="/login" sx={{ mx: 1, color:'white', borderColor:'white', '&:hover': { backgroundColor: 'white', borderColor: 'rgb(25, 118, 210)', color: 'rgb(25, 118, 210)' } }} onClick={handleLogout}>Log out</Button>
             </Toolbar>
         </Container>
     </AppBar>
