@@ -1,5 +1,6 @@
 import os
 import uvicorn
+import jwt
 
 from datetime import datetime
 from typing import List
@@ -32,12 +33,12 @@ app.add_middleware(
 )
 
 load_dotenv()
-username = os.getenv('MONGO_USERNAME')
-password = os.getenv('MONGO_PASSWORD')
-cluster_url = os.getenv('MONGO_CLUSTER_URL')
-if not all([username, password, cluster_url]):
+MONGO_USERNAME = os.getenv('MONGO_USERNAME')
+MONGO_PASSWORD = os.getenv('MONGO_PASSWORD')
+MONGO_CLUSTER_URL = os.getenv('MONGO_CLUSTER_URL')
+if not all([MONGO_USERNAME, MONGO_PASSWORD, MONGO_CLUSTER_URL]):
     raise ValueError("MongoDB connection parameters are not fully configured.")
-uri = f'mongodb+srv://{username}:{password}@{cluster_url}/?retryWrites=true&w=majority&appName=Cluster0'
+uri = f'mongodb+srv://{MONGO_USERNAME}:{MONGO_PASSWORD}@{MONGO_CLUSTER_URL}/?retryWrites=true&w=majority&appName=Cluster0'
 client = MongoClient(uri)
 # try:
 #     client.admin.command('ping')
@@ -45,6 +46,10 @@ client = MongoClient(uri)
 # except Exception as e:
 #     print(e)
 db = client.expenses
+
+# import secrets
+# print(secrets.token_urlsafe(32))
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 ### verifyCredentials ###
 class Credentials(BaseModel):
@@ -58,7 +63,8 @@ async def verify_credentials(credentials: Credentials):
     is_verfied = collection.count_documents({"username": username, "password": password}) == 1
     if not is_verfied:
         raise HTTPException(detail="Invalid credentials", status_code=400)
-    return JSONResponse(content={"status": "success"}, status_code=200)
+    token = jwt.encode({"username": username}, SECRET_KEY, algorithm="HS256")
+    return JSONResponse(content={"status": "success", "token": token}, status_code=200)
 ######
 
 ### addUser ###

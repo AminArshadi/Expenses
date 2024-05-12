@@ -2,15 +2,13 @@ import Nav from './Nav.js';
 import Loading from './Loading.js';
 import { useUser } from './UserContext';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import { DateTime } from 'luxon';
 import { TextField, Autocomplete, Button, MenuItem, Container, Box, FormControl, Select, InputLabel } from '@mui/material';
 import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 
 function HomePage() {
-	const navigate = useNavigate();
 	const { globalUsername, apiURL, setLoading } = useUser();
 
 	const [ groups, setGroups ] = useState([]);

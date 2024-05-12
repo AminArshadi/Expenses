@@ -6,12 +6,12 @@ import { AppBar, Toolbar, Typography, Button, Box, Container } from '@mui/materi
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 
 function Nav() {
-  const { globalUsername, setGlobalUsername } = useUser();
+  const { globalUsername, setToken } = useUser();
   const location = useLocation();
 
   const handleLogout = () => {
-    setGlobalUsername('')
     alert(`${globalUsername} is now logged out.`)
+    setToken('')
   }
 
   const isSelected = (path) => {

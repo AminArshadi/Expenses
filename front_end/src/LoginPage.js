@@ -1,18 +1,22 @@
 import Loading from './Loading.js';
 import { useUser } from './UserContext';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, TextField, Button, Typography, Box, IconButton } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 function LoginPage() {
   const navigate = useNavigate();
-  const { setGlobalUsername, apiURL, setLoading } = useUser();
+  const { setToken, apiURL, setLoading } = useUser();
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    setToken('')
+  }, []);
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -40,8 +44,8 @@ function LoginPage() {
       const data = await response.json();
 
       if (response.ok && data.status === "success") {
-          setGlobalUsername(username);
-          navigate('/home');
+        setToken(data.token)
+        navigate('/home')
       }
       else {
           alert(data.detail || 'An error occurred during login.');
@@ -57,7 +61,6 @@ function LoginPage() {
 
   const handleSignUp = (event) => {
     event.preventDefault();
-    setGlobalUsername('');
     navigate('/signup');
   }
 
