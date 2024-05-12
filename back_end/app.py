@@ -86,13 +86,14 @@ class TransactionInfo(BaseModel):
     finalNumber: float
     selectedDate: datetime
     reason: str
+    selectedGroup: str
     comments: str
     
 @app.post("/sendTransaction")
 async def add_user(transactionInfo: TransactionInfo):
-    username, amount, date, reason, comments = transactionInfo.globalUsername, transactionInfo.finalNumber, transactionInfo.selectedDate, transactionInfo.reason, transactionInfo.comments
+    username, amount, date, reason, group, comments = transactionInfo.globalUsername, transactionInfo.finalNumber, transactionInfo.selectedDate, transactionInfo.reason, transactionInfo.selectedGroup, transactionInfo.comments
     collection = db.transaction
-    send_transaction_to_db(collection, username, amount, date, reason, comments)
+    send_transaction_to_db(collection, username, amount, date, reason, group, comments)
     return JSONResponse(content={"status": "success"}, status_code=200)
 ######
 
@@ -105,10 +106,8 @@ async def get_groups(adminInfo: AdminInfo):
     username = adminInfo.globalUsername
     collection = db.users
     groups = get_groups_by_username_from_db(collection, username)
-    print(username)
     if len(groups) == 1:
         groups = groups[0]
-    print(groups)
     return JSONResponse(content={"status": "success", "groups": groups}, status_code=200)
 ######
 

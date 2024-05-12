@@ -1,5 +1,6 @@
-import { useUser } from './UserContext';
 import Nav from './Nav.js';
+import Loading from './Loading.js';
+import { useUser } from './UserContext';
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -8,7 +9,7 @@ import AddIcon from '@mui/icons-material/Add';
 
 function GroupsPage() {
   const navigate = useNavigate();
-  const { globalUsername, apiURL } = useUser();
+  const { globalUsername, apiURL, setLoading } = useUser();
 
   const [ usernames, setUsernames ] = useState([]);
   const [ groups, setGroups ] = useState([]);
@@ -33,6 +34,7 @@ function GroupsPage() {
   }
 
   const getGroups = async () => {
+    setLoading(true)
     try {
 			const response = await fetch(`${apiURL}/getGroups`, {
 				method: 'POST',
@@ -53,9 +55,13 @@ function GroupsPage() {
 			console.error('Network error:', error);
 			alert('Network error: Could not connect to server.');
 		}
+    finally {
+      setLoading(false);
+    }
   }
 
   const getUsernames = async () => {
+    setLoading(true)
     try {
 			const response = await fetch(`${apiURL}/getUsernames`, {
 				method: 'GET',
@@ -75,11 +81,27 @@ function GroupsPage() {
 			console.error('Network error:', error);
 			alert('Network error: Could not connect to server.');
 		}
+    finally {
+      setLoading(false);
+    }
   }
 
   const handleAddGroup = async (event) => {
 		event.preventDefault()
 
+    // Validation for groupName
+		if (!groupName) {
+			alert("Choose a name for your new group.");
+			return;
+		}
+
+    // Validation for selectedUsernames
+		if (selectedUsernames.length === 0) {
+			alert("Select the username of the people you want to add to the group.");
+			return;
+		}
+
+    setLoading(true)
     try {
 			const response = await fetch(`${apiURL}/groups/addGroup`, {
 				method: 'POST',
@@ -105,6 +127,9 @@ function GroupsPage() {
 			console.error('Network error:', error);
 			alert('Network error: Could not connect to server.');
 		}
+    finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -119,7 +144,7 @@ function GroupsPage() {
 
             <List sx={{ minHeight: 300, maxHeight: 500, overflow: 'auto', width: 800, border: '1.5px solid black', borderRadius: 2, padding: 3}}>
               {
-                groups.length == 0 ?
+                groups.length === 0 ?
                   <ListItem sx={{ left: 140 }}>You are not in any groups yet. Create a new group to get started.</ListItem>
                   :
                   groups.map((group, index) => (
@@ -151,7 +176,7 @@ function GroupsPage() {
 
         <Dialog open={open} onClose={handleCloseFab}>
 
-          <DialogTitle>Create New Group</DialogTitle>
+          <DialogTitle>New Group</DialogTitle>
 
           <DialogContent>
               <TextField
@@ -169,7 +194,7 @@ function GroupsPage() {
               multiple
               sx={{ mt: 2, minWidth:500}}
               fullWidth
-              options={usernames}
+              options={usernames.filter(username => username !== globalUsername)}
               value={selectedUsernames}
               onChange={(event, newValue) => setSelectedUsernames(newValue)}
               getOptionLabel={(option) => option}
@@ -182,13 +207,15 @@ function GroupsPage() {
                   Cancel
               </Button>
               <Button onClick={handleAddGroup} color="primary">
-                  Add
+                  Create
               </Button>
           </DialogActions>
 
         </Dialog>
 
       </Container>
+
+      <Loading />
     </>
   )
 }

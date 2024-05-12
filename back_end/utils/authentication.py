@@ -10,12 +10,13 @@ def add_user_to_db(collection, firstName, lastName, email, username, password):
     insert_result = collection.insert_one(user_record)
     return insert_result.inserted_id
 
-def send_transaction_to_db(collection, username, amount, date, reason, comments):
+def send_transaction_to_db(collection, username, amount, date, reason, group, comments):
     transaction = {
         'date': date,
         'username': username,
         'amount': amount,
         'reason': reason,
+        'group': group,
         'comments': comments
     }
     insert_result = collection.insert_one(transaction)

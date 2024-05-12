@@ -1,3 +1,4 @@
+import Loading from './Loading.js';
 import { useUser } from './UserContext';
 
 import React, { useState } from 'react';
@@ -7,7 +8,7 @@ import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 function SignupPage() {
 	const navigate = useNavigate();
-	const { apiURL } = useUser();
+	const { apiURL, setLoading } = useUser();
 
 	const [firstName, setFirstName] = useState('');
 	const [lastName, setLastName] = useState('');
@@ -21,19 +22,19 @@ function SignupPage() {
 	const handleSignup = async (event) => {
 		event.preventDefault();
 
-		// Validation for First Name
+		// Validate firstName
 		if (!firstName.trim()) {
 			alert('First Name is required.');
 			return;
 		}
 
-		// Validation for Last Name
+		// Validate lastName
 		if (!lastName.trim()) {
 			alert('Last Name is required.');
 			return;
 		}
 
-		// Basic Email Validation
+		// Validate email
 		if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
 			alert('Please enter a valid email address.');
 			return;
@@ -67,18 +68,19 @@ function SignupPage() {
 			return;
 		}
 
-		//
+		// Validate passwordMatch
 		if (!passwordMatch) {
 			alert("Passwords do not match.");
 			return;
 		}
-	
+		
+		setLoading(true)
 		try {
 			const response = await fetch(`${apiURL}/addUser`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ firstName, lastName, email, username, password })
-			});
+			})
 
 			const data = await response.json();
 
@@ -92,6 +94,9 @@ function SignupPage() {
 		catch (error) {
 			console.error('Network error:', error);
 			alert('Network error: Could not connect to server.');
+		}
+		finally {
+			setLoading(false);
 		}
 	};
 
@@ -111,127 +116,131 @@ function SignupPage() {
     }
 
 	return (
-		<Container component="main" maxWidth="xs">
-		<Box sx={{marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+		<>
+			<Container component="main" maxWidth="xs">
+			<Box sx={{marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
 
-			<Typography component="h1" variant="h5" sx={{ fontWeight: 'bold' }}>
-			Sign up
-			</Typography>
+				<Typography component="h1" variant="h5" sx={{ fontWeight: 'bold' }}>
+				Sign up
+				</Typography>
 
-			<Box component="form" noValidate sx={{ mt: 1 }}>
+				<Box component="form" noValidate sx={{ mt: 1 }}>
 
-				<TextField
-					variant="outlined"
-					margin="normal"
-					required
-					fullWidth
-					id="firstName"
-					label="First Name"
-					name="firstName"
-					autoComplete="given-name"
-					autoFocus
-					value={firstName}
-					onChange={e => setFirstName(e.target.value)}
-				/>
+					<TextField
+						variant="outlined"
+						margin="normal"
+						required
+						fullWidth
+						id="firstName"
+						label="First Name"
+						name="firstName"
+						autoComplete="given-name"
+						autoFocus
+						value={firstName}
+						onChange={e => setFirstName(e.target.value)}
+					/>
 
-				<TextField
-					variant="outlined"
-					margin="normal"
-					required
-					fullWidth
-					id="lastName"
-					label="Last Name"
-					name="lastName"
-					autoComplete="family-name"
-					value={lastName}
-					onChange={e => setLastName(e.target.value)}
-				/>
+					<TextField
+						variant="outlined"
+						margin="normal"
+						required
+						fullWidth
+						id="lastName"
+						label="Last Name"
+						name="lastName"
+						autoComplete="family-name"
+						value={lastName}
+						onChange={e => setLastName(e.target.value)}
+					/>
 
-				<TextField
-					variant="outlined"
-					margin="normal"
-					required
-					fullWidth
-					id="email"
-					label="Email"
-					name="email"
-					autoComplete="email"
-					value={email}
-					onChange={e => setEmail(e.target.value)}
-				/>
+					<TextField
+						variant="outlined"
+						margin="normal"
+						required
+						fullWidth
+						id="email"
+						label="Email"
+						name="email"
+						autoComplete="email"
+						value={email}
+						onChange={e => setEmail(e.target.value)}
+					/>
 
-				<TextField
-					variant="outlined"
-					margin="normal"
-					required
-					fullWidth
-					id="username"
-					label="Username"
-					name="username"
-					autoComplete="username"
-					value={username}
-					onChange={e => setUsername(e.target.value)}
-				/>
+					<TextField
+						variant="outlined"
+						margin="normal"
+						required
+						fullWidth
+						id="username"
+						label="Username"
+						name="username"
+						autoComplete="username"
+						value={username}
+						onChange={e => setUsername(e.target.value)}
+					/>
 
-				<TextField
-					variant="outlined"
-					margin="normal"
-					required
-					fullWidth
-					name="password"
-					label="Password"
-					type={showPassword ? 'text' : 'password'}
-					id="password"
-					autoComplete="current-password"
-					value={password}
-					onChange={e => setPassword(e.target.value)}
-					InputProps={{
-						endAdornment: (
-							<IconButton onClick={togglePasswordVisibility} edge="end">
-								{showPassword ? <VisibilityOff /> : <Visibility />}
-							</IconButton>
-						),
-					}}
-				/>
+					<TextField
+						variant="outlined"
+						margin="normal"
+						required
+						fullWidth
+						name="password"
+						label="Password"
+						type={showPassword ? 'text' : 'password'}
+						id="password"
+						autoComplete="current-password"
+						value={password}
+						onChange={e => setPassword(e.target.value)}
+						InputProps={{
+							endAdornment: (
+								<IconButton onClick={togglePasswordVisibility} edge="end">
+									{showPassword ? <VisibilityOff /> : <Visibility />}
+								</IconButton>
+							),
+						}}
+					/>
 
-				<TextField
-					variant="outlined"
-					margin="normal"
-					required
-					fullWidth
-					name="confirmPassword"
-					label="Confirm Password"
-					type={showPassword ? 'text' : 'password'}
-					id="confirmPassword"
-					autoComplete="current-confirm-password"
-					value={secondPassword}
-					onChange={e => confirmPassword(e)}
-					error={!passwordMatch}
-					helperText={!passwordMatch ? "Passwords do not match" : ""}
-					InputProps={{
-						style: {
-							borderColor: !passwordMatch ? 'red' : undefined,
-							borderWidth: !passwordMatch ? 2 : undefined,
-						},
-						endAdornment: (
-							<IconButton onClick={togglePasswordVisibility} edge="end">
-								{showPassword ? <VisibilityOff /> : <Visibility />}
-							</IconButton>
-						)
-					}}
-				/>
+					<TextField
+						variant="outlined"
+						margin="normal"
+						required
+						fullWidth
+						name="confirmPassword"
+						label="Confirm Password"
+						type={showPassword ? 'text' : 'password'}
+						id="confirmPassword"
+						autoComplete="current-confirm-password"
+						value={secondPassword}
+						onChange={e => confirmPassword(e)}
+						error={!passwordMatch}
+						helperText={!passwordMatch ? "Passwords do not match" : ""}
+						InputProps={{
+							style: {
+								borderColor: !passwordMatch ? 'red' : undefined,
+								borderWidth: !passwordMatch ? 2 : undefined,
+							},
+							endAdornment: (
+								<IconButton onClick={togglePasswordVisibility} edge="end">
+									{showPassword ? <VisibilityOff /> : <Visibility />}
+								</IconButton>
+							)
+						}}
+					/>
 
-				<Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }} onClick={handleSignup}>
-					Sign up
-				</Button>
-				
-				<div style={{ textAlign: 'center', fontSize: '14px' }}>
-					Already have an account? <span style={{ cursor: 'pointer', color: 'blue' }} onClick={handleLogin}>Log in</span>
-				</div>
+					<Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }} onClick={handleSignup}>
+						Sign up
+					</Button>
+					
+					<div style={{ textAlign: 'center', fontSize: '14px' }}>
+						Already have an account? <span style={{ cursor: 'pointer', color: 'blue' }} onClick={handleLogin}>Log in</span>
+					</div>
 
+				</Box>
 			</Box>
-		</Box>
-		</Container>
+			</Container>
+
+			<Loading />
+		</>
 	)
 }
 

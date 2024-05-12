@@ -26,11 +26,30 @@ function Nav() {
                   Expenses
                 </Typography>
                 <Box sx={{ display: { xs: 'none', md: 'flex' }, flexGrow: 1, justifyContent: 'flex-middle' }}>
-                    <Button color="inherit" component={RouterLink} to="/home" sx={{ mx: 1, textDecoration: isSelected('/home') }}>Home</Button>
-                    <Button color="inherit" component={RouterLink} to="/groups" sx={{ mx: 1, textDecoration: isSelected('/groups') }}>Groups</Button>
-                    <Button color="inherit" component={RouterLink} to="/reports" sx={{ mx: 1, textDecoration: isSelected('/reports') }}>Reports</Button>
+                    <Button color="inherit" component={RouterLink} to="/home"
+                      sx={{ mx: 1, textDecoration: isSelected('/home'), '&:hover': { textDecoration: 'underline', textDecorationThickness: '2px' }, textDecorationThickness: '3px' }}>Home
+                    </Button>
+                    <Button color="inherit" component={RouterLink} to="/groups"
+                      sx={{ mx: 1, textDecoration: isSelected('/groups'), '&:hover': { textDecoration: 'underline', textDecorationThickness: '2px' }, textDecorationThickness: '3px' }}>Groups
+                    </Button>
+                    <Button color="inherit" component={RouterLink} to="/reports"
+                      sx={{ mx: 1, textDecoration: isSelected('/reports'),  '&:hover': { textDecoration: 'underline', textDecorationThickness: '2px' }, textDecorationThickness: '3px' }}>Reports
+                    </Button>
                 </Box>
-                <Button variant="outlined" color="secondary" component={RouterLink} to="/login" sx={{ mx: 1, color:'white', borderColor:'white', '&:hover': { backgroundColor: 'white', borderColor: 'rgb(25, 118, 210)', color: 'rgb(25, 118, 210)' } }} onClick={handleLogout}>Log out</Button>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mx: 1 }}>
+                  <Button
+                    variant="outlined" color="secondary" component={RouterLink} to="/login" onClick={handleLogout}
+                    sx={{
+                      mx: 1,
+                      color:'white',
+                      borderColor:'white',
+                      '&:hover': { backgroundColor: 'white', borderColor: 'rgb(25, 118, 210)', color: 'rgb(25, 118, 210)' }
+                    }} > Log out
+                  </Button>
+                <Typography variant="caption" sx={{ color: 'lightgrey', fontSize: 10 }}>
+                  Logged in as {globalUsername}
+                </Typography>
+                </Box>
             </Toolbar>
         </Container>
     </AppBar>

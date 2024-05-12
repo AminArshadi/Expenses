@@ -1,3 +1,4 @@
+import Loading from './Loading.js';
 import { useUser } from './UserContext';
 
 import React, { useState } from 'react';
@@ -7,7 +8,7 @@ import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 function LoginPage() {
   const navigate = useNavigate();
-  const { setGlobalUsername, apiURL } = useUser();
+  const { setGlobalUsername, apiURL, setLoading } = useUser();
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -28,6 +29,7 @@ function LoginPage() {
       return;
     }
     
+    setLoading(true)
     try {
       const response = await fetch(`${apiURL}/verifyCredentials`, {
         method: 'POST',
@@ -48,6 +50,9 @@ function LoginPage() {
     catch (error) {
         alert('Network error: Could not connect to server.');
     }
+    finally {
+			setLoading(false);
+		}
   };
 
   const handleSignUp = (event) => {
@@ -61,61 +66,65 @@ function LoginPage() {
   }
 
   return (
-    <Container component="main" maxWidth="xs">
-      <Box sx={{marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+    <>
+      <Container component="main" maxWidth="xs">
+        <Box sx={{marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
 
-        <Typography component="h1" variant="h5" sx={{ fontWeight: 'bold' }}>
-            Log in
-        </Typography>
+          <Typography component="h1" variant="h5" sx={{ fontWeight: 'bold' }}>
+              Log in
+          </Typography>
 
-        <Box component="form" noValidate sx={{ mt: 1 }}>
+          <Box component="form" noValidate sx={{ mt: 1 }}>
 
-          <TextField
+            <TextField
+                variant="outlined"
+                margin="normal"
+                required
+                fullWidth
+                id="username"
+                label="Username"
+                name="username"
+                autoComplete="username"
+                autoFocus
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+            />
+
+            <TextField
               variant="outlined"
               margin="normal"
               required
               fullWidth
-              id="username"
-              label="Username"
-              name="username"
-              autoComplete="username"
-              autoFocus
-              value={username}
-              onChange={e => setUsername(e.target.value)}
-          />
+              name="password"
+              label="Password"
+              type={showPassword ? 'text' : 'password'}
+              id="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              InputProps={{
+                endAdornment: (
+                  <IconButton onClick={togglePasswordVisibility} edge="end">
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                ),
+              }}
+            />
 
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label="Password"
-            type={showPassword ? 'text' : 'password'}
-            id="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            InputProps={{
-              endAdornment: (
-                <IconButton onClick={togglePasswordVisibility} edge="end">
-                  {showPassword ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              ),
-            }}
-          />
+            <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }} onClick={handleLogin}>
+              Log In
+            </Button>
+            <div style={{ textAlign: 'center', fontSize: '14px' }}>
+                Don't have an account? <span style={{ cursor: 'pointer', color: 'blue' }} onClick={handleSignUp}>Sign Up</span>
+            </div>
 
-          <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }} onClick={handleLogin}>
-            Log In
-          </Button>
-          <div style={{ textAlign: 'center', fontSize: '14px' }}>
-              Don't have an account? <span style={{ cursor: 'pointer', color: 'blue' }} onClick={handleSignUp}>Sign Up</span>
-          </div>
+          </Box>
 
         </Box>
+      </Container>
 
-      </Box>
-    </Container>
+      <Loading />
+    </>
   )
 }
 

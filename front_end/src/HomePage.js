@@ -1,4 +1,5 @@
 import Nav from './Nav.js';
+import Loading from './Loading.js';
 import { useUser } from './UserContext';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -10,11 +11,14 @@ import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 
 function HomePage() {
 	const navigate = useNavigate();
-	const { globalUsername, apiURL } = useUser();
+	const { globalUsername, apiURL, setLoading } = useUser();
+
+	const [ groups, setGroups ] = useState([]);
 	
 	const [sign, setSign] = useState('+');
 	const [number, setNumber] = useState(null);
 	const [selectedDate, setSelectedDate] = useState(DateTime.now());
+	const [selectedGroup, setSelectedGroup] = useState(null);
 	const [comments, setComments] = useState('');
 	const [reason, setReason] = useState(null);
 	const reasons = [
@@ -23,6 +27,37 @@ function HomePage() {
 		{value: "rent", label: 'Rent'},
 		{value: "other", label: 'Other'},
 	]
+
+	useEffect(() => {
+		getGroups()
+	}, []);
+
+	const getGroups = async () => {
+		setLoading(true)
+		try {
+			const response = await fetch(`${apiURL}/getGroups`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ globalUsername })
+			});
+		
+			const data = await response.json();
+		
+			if (response.ok && data.status === "success") {
+				setGroups(data.groups)
+			}
+			else {
+				alert(data.detail || 'An error occurred while sending information.');
+			}
+		}
+		catch (error) {
+			console.error('Network error:', error);
+			alert('Network error: Could not connect to server.');
+		}
+		finally {
+			setLoading(false);
+		}
+	}
 
 	const handleSubmit = async (event) => {
 		event.preventDefault();
@@ -39,13 +74,19 @@ function HomePage() {
 			return;
 		}
 
-		let finalNumber = sign === "+" ? number : number * -1;
+		// Validation for selectedGroup
+		if (!selectedGroup) {
+			alert("Select a group.");
+			return;
+		}
 
+		setLoading(true)
+		let finalNumber = sign === "+" ? number : number * -1;
 		try {
 			const response = await fetch(`${apiURL}/sendTransaction`, {
 				method: 'POST',
 			  	headers: { 'Content-Type': 'application/json' },
-			  	body: JSON.stringify({ globalUsername, finalNumber, selectedDate, reason, comments })
+			  	body: JSON.stringify({ globalUsername, finalNumber, selectedDate, reason, selectedGroup, comments })
 			});
 	  
 			const data = await response.json();
@@ -60,6 +101,9 @@ function HomePage() {
 		catch (error) {
 			console.error('Network error:', error);
 			alert('Network error: Could not connect to server.');
+		}
+		finally {
+			setLoading(false);
 		}
 	}
 
@@ -118,6 +162,18 @@ function HomePage() {
 						)}
 					/>
 
+					<Autocomplete
+						sx={{ mt: 2 }}
+						fullWidth
+						options={groups}
+						value={selectedGroup}
+						onChange={(event, newValue) => setSelectedGroup(newValue)}
+              			getOptionLabel={(option) => option}
+						renderInput={(params) => (
+							<TextField {...params} required label="Group" variant="outlined" />
+						)}
+					/>
+
 					<TextField
 						style={{ marginTop: 20 }}
 						multiline
@@ -135,6 +191,8 @@ function HomePage() {
 
 				</Box>
 			</Container>
+
+			<Loading />
 		</>
 	);
 }
