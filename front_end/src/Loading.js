@@ -6,7 +6,7 @@ function Loading() {
   const { loading } = useUser();
 
   return (
-    <Backdrop open={loading} sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+    <Backdrop open={loading} sx={{ zIndex: (theme) => theme.zIndex.modal + 1 }}>
       <CircularProgress color="primary" />
     </Backdrop>
   )

@@ -27,13 +27,13 @@ function Nav() {
                 </Typography>
                 <Box sx={{ display: { xs: 'none', md: 'flex' }, flexGrow: 1, justifyContent: 'flex-middle' }}>
                     <Button color="inherit" component={RouterLink} to="/home"
-                      sx={{ mx: 1, textDecoration: isSelected('/home'), '&:hover': { textDecoration: 'underline', textDecorationThickness: '2px' }, textDecorationThickness: '3px' }}>Home
+                      sx={{ mx: 1, textDecoration: isSelected('/home'), textUnderlineOffset: 5, '&:hover': { textDecoration: 'underline', textDecorationThickness: '2px' }, textDecorationThickness: '3px' }}>Home
                     </Button>
                     <Button color="inherit" component={RouterLink} to="/groups"
-                      sx={{ mx: 1, textDecoration: isSelected('/groups'), '&:hover': { textDecoration: 'underline', textDecorationThickness: '2px' }, textDecorationThickness: '3px' }}>Groups
+                      sx={{ mx: 1, textDecoration: isSelected('/groups'), textUnderlineOffset: 5, '&:hover': { textDecoration: 'underline', textDecorationThickness: '2px' }, textDecorationThickness: '3px' }}>Groups
                     </Button>
                     <Button color="inherit" component={RouterLink} to="/reports"
-                      sx={{ mx: 1, textDecoration: isSelected('/reports'),  '&:hover': { textDecoration: 'underline', textDecorationThickness: '2px' }, textDecorationThickness: '3px' }}>Reports
+                      sx={{ mx: 1, textDecoration: isSelected('/reports'), textUnderlineOffset: 5, '&:hover': { textDecoration: 'underline', textDecorationThickness: '2px' }, textDecorationThickness: '3px' }}>Reports
                     </Button>
                 </Box>
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mx: 1 }}>

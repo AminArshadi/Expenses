@@ -3,12 +3,16 @@ import { useUser } from './UserContext';
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, TextField, Button, Typography, Box, IconButton } from '@mui/material';
+import { Container, TextField, Button, Typography, Box, IconButton, Paper, Snackbar, Alert } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 function LoginPage() {
   const navigate = useNavigate();
   const { setToken, apiURL, setLoading } = useUser();
+
+  const [alertOpen, setAlertOpen] = useState(false)
+  const [message, setmessage] = useState('')
+  const [severity, setSeverity] = useState('success')
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -18,18 +22,28 @@ function LoginPage() {
     setToken('')
   }, []);
 
+  const showAlert = (message, severity) => {
+    setmessage(message);
+    setSeverity(severity);
+    setAlertOpen(true);
+  }
+
+  const hideAlert = () => {
+    setAlertOpen(false)
+  }
+
   const handleLogin = async (event) => {
     event.preventDefault();
   
     // Validate username
     if (!username.trim()) {
-      alert("Username is required.");
+      showAlert("Username is required.", 'warning');
       return;
     }
   
     // Validate password
     if (!password) {
-      alert("Password is required.");
+      showAlert("Password is required.", 'warning');
       return;
     }
     
@@ -48,11 +62,11 @@ function LoginPage() {
         navigate('/home')
       }
       else {
-          alert(data.detail || 'An error occurred during login.');
+        showAlert(data.detail || 'An error occurred during login.', 'error');
       }
     }
     catch (error) {
-        alert('Network error: Could not connect to server.');
+      showAlert('Network error: Could not connect to server.', 'error');
     }
     finally {
 			setLoading(false);
@@ -71,9 +85,10 @@ function LoginPage() {
   return (
     <>
       <Container component="main" maxWidth="xs">
-        <Box sx={{marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
 
-          <Typography component="h1" variant="h5" sx={{ fontWeight: 'bold' }}>
+        <Paper elevation={10} sx={{ mt: 8, p: 4, borderRadius: 2 }}>
+
+          <Typography component="h1" variant="h5" align='center' sx={{ fontWeight: 'bold' }}>
               Log in
           </Typography>
 
@@ -123,10 +138,17 @@ function LoginPage() {
 
           </Box>
 
-        </Box>
+        </Paper>
+
       </Container>
 
       <Loading />
+
+      <Snackbar open={alertOpen} autoHideDuration={6000} onClose={hideAlert} anchorOrigin={{ vertical: 'top', horizontal: 'right' }}>
+        <Alert onClose={hideAlert} severity={severity} sx={{ width: '100%' }}>
+          {message}
+        </Alert>
+      </Snackbar>
     </>
   )
 }

@@ -4,12 +4,16 @@ import { useUser } from './UserContext';
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, TextField, Button, Box, Fab, List, ListItem, ListItemText, Dialog, DialogTitle, DialogContent, DialogActions, Autocomplete } from '@mui/material';
+import { Container, TextField, Button, Box, Fab, List, ListItem, ListItemText, Dialog, DialogTitle, DialogContent, DialogActions, Autocomplete, Paper, Snackbar, Alert } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 
 function GroupsPage() {
   const navigate = useNavigate();
   const { globalUsername, apiURL, setLoading } = useUser();
+
+  const [alertOpen, setAlertOpen] = useState(false)
+  const [message, setmessage] = useState('')
+  const [severity, setSeverity] = useState('success')
 
   const [ usernames, setUsernames ] = useState([]);
   const [ groups, setGroups ] = useState([]);
@@ -23,13 +27,33 @@ function GroupsPage() {
   useEffect(() => {
     getUsernames()
     getGroups()
-  }, []);
+  }, [globalUsername]);
+
+  const showAlert = (message, severity) => {
+    setmessage(message);
+    setSeverity(severity);
+    setAlertOpen(true);
+  }
+
+  const hideAlert = () => {
+    setAlertOpen(false)
+  }
 
   const handleOpenFab = () => {
     setOpen(true)
   }
 
   const handleCloseFab = () => {
+    setGroupName('')
+    setSelectedUsernames([]);
+    setOpen(false)
+  }
+
+  const resetFields = () => {
+    getUsernames()
+    getGroups()
+    setGroupName('')
+    setSelectedUsernames([]);
     setOpen(false)
   }
 
@@ -38,22 +62,22 @@ function GroupsPage() {
     try {
 			const response = await fetch(`${apiURL}/getGroups`, {
 				method: 'POST',
-			  headers: { 'Content-Type': 'application/json' },
-			  body: JSON.stringify({ globalUsername })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ globalUsername })
 			});
-	  
+
 			const data = await response.json();
-	  
+
 			if (response.ok && data.status === "success") {
 				setGroups(data.groups)
 			}
 			else {
-				alert(data.detail || 'An error occurred while sending information.');
+        showAlert(data.detail || 'An error occurred while sending information.', 'error');
 			}
 		}
 		catch (error) {
 			console.error('Network error:', error);
-			alert('Network error: Could not connect to server.');
+      showAlert('Network error: Could not connect to server.', 'error');
 		}
     finally {
       setLoading(false);
@@ -67,19 +91,19 @@ function GroupsPage() {
 				method: 'GET',
         headers: { 'Content-Type': 'application/json' }
 			});
-	  
+
 			const data = await response.json();
-	  
+
 			if (response.ok && data.status === "success") {
 				setUsernames(data.usernames)
 			}
 			else {
-				alert(data.detail || 'An error occurred while sending information.');
+        showAlert(data.detail || 'An error occurred while sending information.', 'error');
 			}
 		}
 		catch (error) {
 			console.error('Network error:', error);
-			alert('Network error: Could not connect to server.');
+      showAlert('Network error: Could not connect to server.', 'error');
 		}
     finally {
       setLoading(false);
@@ -91,13 +115,13 @@ function GroupsPage() {
 
     // Validation for groupName
 		if (!groupName) {
-			alert("Choose a name for your new group.");
+      showAlert("Choose a name for your new group.", 'warning');
 			return;
 		}
 
     // Validation for selectedUsernames
 		if (selectedUsernames.length === 0) {
-			alert("Select the username of the people you want to add to the group.");
+      showAlert("Select the username of the people you want to add to the group.", 'warning');
 			return;
 		}
 
@@ -112,20 +136,20 @@ function GroupsPage() {
           members_usernames: selectedUsernames,
         })
 			});
-	  
+
 			const data = await response.json();
-	  
+
 			if (response.ok && data.status === "success") {
-				window.location.reload()
-        alert(`Group ${groupName} is created.`)
+        resetFields()
+        showAlert(`Group ${groupName} is created.`, 'success')
 			}
 			else {
-				alert(data.detail || 'An error occurred while sending information.');
+        showAlert(data.detail || 'An error occurred while sending information.', 'error');
 			}
 		}
 		catch (error) {
 			console.error('Network error:', error);
-			alert('Network error: Could not connect to server.');
+      showAlert('Network error: Could not connect to server.', 'error');
 		}
     finally {
       setLoading(false);
@@ -136,13 +160,13 @@ function GroupsPage() {
     <>
       <Nav />
       
-      <Container component="main" maxWidth="sm">
+      <Container component="main" maxWidth="md">
 
-        <Box sx={{marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+        <Paper elevation={10} sx={{ mt: 8, p: 4, borderRadius: 2 }}>
 
           <Box component="form" noValidate sx={{ mt: 1 }}>
 
-            <List sx={{ minHeight: 300, maxHeight: 500, overflow: 'auto', width: 800, border: '1.5px solid black', borderRadius: 2, padding: 3}}>
+            <List sx={{ minHeight: 300, maxHeight: 500, overflow: 'auto', border: '1px solid black', borderRadius: 2, padding: 3}}>
               {
                 groups.length === 0 ?
                   <ListItem sx={{ left: 140 }}>You are not in any groups yet. Create a new group to get started.</ListItem>
@@ -172,7 +196,7 @@ function GroupsPage() {
 
           </Box>
 
-        </Box>
+        </Paper>
 
         <Dialog open={open} onClose={handleCloseFab}>
 
@@ -216,6 +240,12 @@ function GroupsPage() {
       </Container>
 
       <Loading />
+
+      <Snackbar open={alertOpen} autoHideDuration={6000} onClose={hideAlert} anchorOrigin={{ vertical: 'top', horizontal: 'right' }}>
+        <Alert onClose={hideAlert} severity={severity} sx={{ width: '100%' }}>
+          {message}
+        </Alert>
+      </Snackbar>
     </>
   )
 }
