@@ -1,8 +1,6 @@
 build:
   docker:
-    frontend: front_end/Dockerfile
-    backend: back_end/Dockerfile
+    web: Dockerfile
 
 run:
   web: docker-compose up
-
