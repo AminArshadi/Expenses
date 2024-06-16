@@ -3,16 +3,20 @@ import Loading from './Loading.js';
 import { useUser } from './UserContext';
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Container, TextField, Button, Box, Fab, List, ListItem, ListItemText, Dialog, DialogTitle, DialogContent, DialogActions, Autocomplete, Paper, Snackbar, Alert } from '@mui/material';
+import { useParams } from 'react-router-dom';
+import { Container, TextField, Button, Box, Dialog, DialogTitle, DialogContent,
+  DialogActions, Autocomplete, Paper, Snackbar, Alert, Table, TableBody, TableCell, TableContainer, TableHead, TableRow
+} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import GroupAddIcon from '@mui/icons-material/GroupAdd';
 
-function GroupsPage() {
-  const navigate = useNavigate();
-  const { globalUsername, apiURL, setLoading } = useUser();
+const GroupsPage = () => {
+  const { apiURL, setLoading } = useUser();
+
+  const { username } = useParams();
 
   const [alertOpen, setAlertOpen] = useState(false)
-  const [message, setmessage] = useState('')
+  const [message, setMessage] = useState('')
   const [severity, setSeverity] = useState('success')
 
   const [ usernames, setUsernames ] = useState([]);
@@ -21,16 +25,15 @@ function GroupsPage() {
   const [open, setOpen] = useState(false);
 
   const [groupName, setGroupName] = useState('')
-  const [adminUsername, setAdminUsername] = useState(globalUsername)
-  const [selectedUsernames, setSelectedUsernames] = useState([]);
+  const [selectedMembersUsernames, setSelectedMembersUsernames] = useState([]);
 
   useEffect(() => {
     getUsernames()
     getGroups()
-  }, [globalUsername]);
+  }, [username]);
 
   const showAlert = (message, severity) => {
-    setmessage(message);
+    setMessage(message);
     setSeverity(severity);
     setAlertOpen(true);
   }
@@ -45,7 +48,7 @@ function GroupsPage() {
 
   const handleCloseFab = () => {
     setGroupName('')
-    setSelectedUsernames([]);
+    setSelectedMembersUsernames([]);
     setOpen(false)
   }
 
@@ -53,7 +56,7 @@ function GroupsPage() {
     getUsernames()
     getGroups()
     setGroupName('')
-    setSelectedUsernames([]);
+    setSelectedMembersUsernames([]);
     setOpen(false)
   }
 
@@ -63,7 +66,7 @@ function GroupsPage() {
 			const response = await fetch(`${apiURL}/getGroups`, {
 				method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ globalUsername })
+        body: JSON.stringify({ username })
 			});
 
 			const data = await response.json();
@@ -119,8 +122,8 @@ function GroupsPage() {
 			return;
 		}
 
-    // Validation for selectedUsernames
-		if (selectedUsernames.length === 0) {
+    // Validation for selectedMembersUsernames
+		if (selectedMembersUsernames.length === 0) {
       showAlert("Select the username of the people you want to add to the group.", 'warning');
 			return;
 		}
@@ -132,8 +135,8 @@ function GroupsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           group_name: groupName,
-          admin_username: adminUsername,
-          members_usernames: selectedUsernames,
+          admin_username: username,
+          members_usernames: selectedMembersUsernames,
         })
 			});
 
@@ -156,85 +159,145 @@ function GroupsPage() {
     }
   }
 
+    const handleEditGroup = async (event, group) => {
+    event.preventDefault();
+    // Handle edit group functionality
+    console.log('Edit group', group);
+  }
+
+  const handleLeaveGroup = async (event, group) => {
+    event.preventDefault();
+
+    setLoading(true)
+    try {
+      const response = await fetch(`${apiURL}/groups/deleteGroup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          group_name: group,
+          admin_username: username,
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.status === "success") {
+        getGroups()
+        showAlert(data.msg, 'success')
+      }
+      else {
+        showAlert(data.msg || 'An error occurred while sending information.', 'error');
+      }
+    }
+    catch (error) {
+      console.error('Network error:', error);
+      showAlert('Network error: Could not connect to server.', 'error');
+    }
+    finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <>
-      <Nav />
+      <Nav username={username} />
       
       <Container component="main" maxWidth="md">
 
-        <Paper elevation={10} sx={{ mt: 8, p: 4, borderRadius: 2 }}>
+        <Button variant="contained" onClick={handleOpenFab} sx={{ position: 'absolute', right: 50, bottom: 60 }}>
+          Create group
+          <AddIcon />
+        </Button>
 
-          <Box component="form" noValidate sx={{ mt: 1 }}>
+        <TableContainer component={Paper} elevation={10} sx={{ mt: 5, borderRadius: 2, boxShadow: 3, maxHeight: 600, overflow: 'auto' }}>
+          <Table stickyHeader>
+            <TableHead sx={{ backgroundColor: '#f5f5f5', borderBottom: '2px solid lightgrey' }}>
+              <TableRow>
+                <TableCell sx={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#333' }}>Name</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#333' }}>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {groups.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={2} align="center" sx={{ paddingTop: 10, color: 'lightgrey', height: 70 }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <GroupAddIcon sx={{ fontSize: 60, mb: 1 }} />
+                      You are not currently in any groups. Create a new group to get started.
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                groups.map((group, index) => (
+                  <TableRow key={index} sx={{ height: 70, '&:hover': { backgroundColor: '#f5f5f5' }, '&:last-child td, &:last-child th': { border: 0 } }}>
+                    <TableCell sx={{ height: 70, verticalAlign: 'middle', fontSize: '1rem', color: '#555' }}>{group}</TableCell>
+                    <TableCell align="right" sx={{ height: 70, verticalAlign: 'middle' }}>
+                      <Button
+                        variant="outlined"
+                        sx={{
+                          color: 'black',
+                          borderColor: 'black',
+                          '&:hover': { backgroundColor: 'grey', borderColor: 'white', color: 'white' },
+                          marginRight: 1
+                        }}
+                        onClick={(e) => handleEditGroup(e, group)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        sx={{
+                          color: 'red',
+                          borderColor: 'red',
+                          '&:hover': { backgroundColor: 'red', borderColor: 'white', color: 'white' }
+                        }}
+                        onClick={(e) => handleLeaveGroup(e, group)}
+                      >
+                        Leave
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
-            <List sx={{ minHeight: 300, maxHeight: 500, overflow: 'auto', border: '1px solid black', borderRadius: 2, padding: 3}}>
-              {
-                groups.length === 0 ?
-                  <ListItem sx={{ left: 140 }}>You are not in any groups yet. Create a new group to get started.</ListItem>
-                  :
-                  groups.map((group, index) => (
-                    <ListItem key={index} sx={{border: '1px solid grey', borderRadius: 2, mb: 1}}>
-
-                        <ListItemText primary={group} />
-
-                        <Button variant="outlined" sx={{ color:'black', borderColor:'black', '&:hover': { backgroundColor: 'grey', borderColor: 'white', color: 'white' }}}>
-                          Edit
-                        </Button>
-
-                        <Button variant="outlined" sx={{ color:'red', borderColor:'red', ml: 1, '&:hover': { backgroundColor: 'red', borderColor: 'white', color: 'white' }}}>
-                          Leave
-                        </Button>
-
-                    </ListItem>
-                  ))
-              }
-
-              <Fab color="primary" aria-label="add" onClick={handleOpenFab} sx={{ mt:2, position: 'absolute', left: '50%', bottom: 20, transform: 'translateX(-50%)' }}>
-                <AddIcon />
-              </Fab>
-              
-            </List>
-
-          </Box>
-
-        </Paper>
-
-        <Dialog open={open} onClose={handleCloseFab}>
-
-          <DialogTitle>New Group</DialogTitle>
-
-          <DialogContent>
+        <Dialog open={open} onClose={handleCloseFab} maxWidth="sm" fullWidth>
+          <DialogTitle sx={{ textAlign: 'center', fontWeight: 'bold' }}>New Group</DialogTitle>
+          <DialogContent dividers>
+            <Box component="form" noValidate sx={{ mt: 1, mb: 1 }}>
               <TextField
                 required
                 autoFocus
                 fullWidth
                 label="Group Name"
                 type="text"
-                variant="outlined" // outlined - filled - standard
+                variant="outlined"
                 margin="dense"
                 value={groupName}
-                onChange={e => setGroupName(e.target.value)}
+                onChange={(e) => setGroupName(e.target.value)}
+                sx={{ mb: 2 }}
               />
-            <Autocomplete
-              multiple
-              sx={{ mt: 2, minWidth:500}}
-              fullWidth
-              options={usernames.filter(username => username !== globalUsername)}
-              value={selectedUsernames}
-              onChange={(event, newValue) => setSelectedUsernames(newValue)}
-              getOptionLabel={(option) => option}
-              renderInput={(params) => ( <TextField {...params} required label="Usernames" variant="outlined" /> )}
-            />
+              <Autocomplete
+                multiple
+                options={usernames.filter((elem) => elem !== username)}
+                value={selectedMembersUsernames}
+                onChange={(event, newValue) => setSelectedMembersUsernames(newValue)}
+                getOptionLabel={(option) => option}
+                renderInput={(params) => <TextField {...params} required label="Members" variant="outlined" />}
+                sx={{ mt: 2, minWidth: 500 }}
+              />
+            </Box>
           </DialogContent>
-
-          <DialogActions>
-              <Button onClick={handleCloseFab} color="primary">
-                  Cancel
-              </Button>
-              <Button onClick={handleAddGroup} color="primary">
-                  Create
-              </Button>
+          <DialogActions sx={{ justifyContent: 'right', pb: 2, mr: 2, mt: 1 }}>
+            <Button onClick={handleCloseFab} color="primary" variant="outlined" sx={{ mr: 2 }}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddGroup} color="primary" variant="contained">
+              Create
+            </Button>
           </DialogActions>
-
         </Dialog>
 
       </Container>

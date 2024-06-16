@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { Container, TextField, Button, Typography, Box, IconButton, Paper, Snackbar, Alert } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 
-function LoginPage() {
+const LoginPage = () => {
   const navigate = useNavigate();
   const { setToken, apiURL, setLoading } = useUser();
 
@@ -59,7 +59,7 @@ function LoginPage() {
 
       if (response.ok && data.status === "success") {
         setToken(data.token)
-        navigate('/home')
+        navigate(`/home/${username}`)
       }
       else {
         showAlert(data.detail || 'An error occurred during login.', 'error');

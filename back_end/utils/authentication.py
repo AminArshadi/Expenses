@@ -33,21 +33,35 @@ def get_all_usernames_from_db(collection):
     usernames = collection.distinct('username')
     return usernames
 
-def add_group_to_db(groups_collection, users_collection, group_name, admin_username, memebers_usernames):
-    memebers_usernames = [admin_username] + memebers_usernames
+def add_group_to_db(groups_collection, users_collection, group_name, admin_username, members_usernames):
+    members_usernames = [admin_username] + members_usernames
     group_record = {
         'group_name': group_name,
         'admin_username': admin_username,
-        'memebers_usernames': memebers_usernames
+        'members_usernames': members_usernames
     }
     groups_collection.insert_one(group_record)
     
-    for memeber_username in memebers_usernames:
+    for member_username in members_usernames:
         users_collection.update_one(
-            {'username': memeber_username},
+            {'username': member_username},
             {'$addToSet': {'groups': group_name}}
         )
     return
+
+def delete_group_from_db(groups_collection, users_collection, group_name, admin_username):
+    # Step 1: Remove the group from the groups_collection
+    delete_result = groups_collection.delete_one({'group_name': group_name, 'admin_username': admin_username})
+    if delete_result.deleted_count == 0:
+        return False, f"No group found with name '{group_name}' and admin '{admin_username}'"
+    
+    # Step 2: Remove the group name from the groups field of each user in the users_collection
+    users_collection.update_many(
+        {'groups': group_name},
+        {'$pull': {'groups': group_name}}
+    )
+    return True, f"Group '{group_name}' successfully deleted."
+    
     
 # def add_member_to_group(users_collection, groups_collection, group_name, member_username):
 #     users_collection.update_one(
@@ -56,6 +70,6 @@ def add_group_to_db(groups_collection, users_collection, group_name, admin_usern
 #     )
 #     groups_collection.update_one(
 #         {'group_name': group_name},
-#         {'$addToSet': {'memebers_usernames': member_username}}
+#         {'$addToSet': {'members_usernames': member_username}}
 #     )
 #     return

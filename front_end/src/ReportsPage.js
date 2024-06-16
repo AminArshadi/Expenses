@@ -1,10 +1,15 @@
 import Nav from './Nav.js';
 
-function ReportsPage() {
+import { useParams } from 'react-router-dom';
+
+const ReportsPage = () => {
+
+  const { username } = useParams();
+
   return (
     <>
 
-      <Nav />
+      <Nav username={username} />
 
       <div className="ReportsPage">
         

@@ -8,7 +8,7 @@ import ReportsPage from './ReportsPage.js';
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-function App() {
+const App = () => {
   return (
     <>
       <BrowserRouter>
@@ -16,9 +16,9 @@ function App() {
           <Route path="/" element={<LoginPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
-          <Route path="/home" element={<HomePage />} />
-          <Route path="/groups" element={<GroupsPage />} />
-          <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/home/:username" element={<HomePage />} />
+          <Route path="/groups/:username" element={<GroupsPage />} />
+          <Route path="/reports/:username" element={<ReportsPage />} />
         </Routes>
       </BrowserRouter>
     </>

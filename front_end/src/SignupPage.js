@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { Container, TextField, Button, Typography, Box, IconButton, Paper, Snackbar, Alert } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 
-function SignupPage() {
+const SignupPage = () => {
 	const navigate = useNavigate();
 	const { apiURL, setLoading } = useUser();
 

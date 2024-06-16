@@ -14,6 +14,7 @@ from utils.authentication import (
     add_user_to_db,
     send_transaction_to_db,
     add_group_to_db,
+    delete_group_from_db,
     get_groups_by_username_from_db,
     get_all_usernames_from_db,
 )
@@ -88,7 +89,7 @@ async def add_user(userInfo: UserInfo):
 
 ### sendTransaction ###
 class TransactionInfo(BaseModel):
-    globalUsername: str
+    username: str
     finalNumber: float
     selectedDate: datetime
     reason: str
@@ -97,7 +98,7 @@ class TransactionInfo(BaseModel):
     
 @app.post("/sendTransaction")
 async def add_user(transactionInfo: TransactionInfo):
-    username, amount, date, reason, group, comments = transactionInfo.globalUsername, transactionInfo.finalNumber, transactionInfo.selectedDate, transactionInfo.reason, transactionInfo.selectedGroup, transactionInfo.comments
+    username, amount, date, reason, group, comments = transactionInfo.username, transactionInfo.finalNumber, transactionInfo.selectedDate, transactionInfo.reason, transactionInfo.selectedGroup, transactionInfo.comments
     collection = db.transaction
     send_transaction_to_db(collection, username, amount, date, reason, group, comments)
     return JSONResponse(content={"status": "success"}, status_code=200)
@@ -105,11 +106,11 @@ async def add_user(transactionInfo: TransactionInfo):
 
 ### getGroups ###
 class AdminInfo(BaseModel):
-    globalUsername: str
+    username: str
     
 @app.post("/getGroups")
 async def get_groups(adminInfo: AdminInfo):
-    username = adminInfo.globalUsername
+    username = adminInfo.username
     collection = db.users
     groups = get_groups_by_username_from_db(collection, username)
     if len(groups) == 1:
@@ -126,17 +127,32 @@ async def get_usernames():
 ######
 
 ### addGroup ###
-class GroupInfo(BaseModel):
+class GroupInfoAdd(BaseModel):
     group_name: str
     admin_username: str
     members_usernames: List[str]
     
 @app.post("/groups/addGroup")
-async def add_group(groupInfo: GroupInfo):
+async def add_group(groupInfo: GroupInfoAdd):
     group_name, admin_username, members_usernames = groupInfo.group_name, groupInfo.admin_username, groupInfo.members_usernames
     groups_collection, users_collection = db.groups, db.users
     add_group_to_db(groups_collection, users_collection, group_name, admin_username, members_usernames)
     return JSONResponse(content={"status": "success"}, status_code=200)
+######
+
+### deleteGroup ###
+class GroupInfoDelete(BaseModel):
+    group_name: str
+    admin_username: str
+    
+@app.post("/groups/deleteGroup")
+async def add_group(groupInfo: GroupInfoDelete):
+    group_name, admin_username = groupInfo.group_name, groupInfo.admin_username
+    groups_collection, users_collection = db.groups, db.users
+    result, msg = delete_group_from_db(groups_collection, users_collection, group_name, admin_username)
+    if not result:
+        return JSONResponse(content={"status": "failed", "msg": msg}, status_code=200)
+    return JSONResponse(content={"status": "success", "msg": msg}, status_code=200)
 ######
 
 if __name__ == "__main__":

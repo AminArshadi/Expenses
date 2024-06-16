@@ -3,16 +3,19 @@ import Loading from './Loading.js';
 import { useUser } from './UserContext';
 
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { DateTime } from 'luxon';
-import { TextField, Autocomplete, Button, MenuItem, Container, Box, FormControl, Select, InputLabel, Paper, Snackbar, Alert } from '@mui/material';
+import { TextField, Autocomplete, Button, MenuItem, Container, FormControl, Select, InputLabel, Paper, Snackbar, Alert } from '@mui/material';
 import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 
-function HomePage() {
-	const { globalUsername, apiURL, setLoading } = useUser();
+const HomePage = () => {
+	const { apiURL, setLoading } = useUser();
+
+	const { username } = useParams();
 
 	const [alertOpen, setAlertOpen] = useState(false)
-	const [message, setmessage] = useState('')
+	const [message, setMessage] = useState('')
 	const [severity, setSeverity] = useState('success')
 
 	const [ groups, setGroups ] = useState([]);
@@ -32,10 +35,10 @@ function HomePage() {
 
 	useEffect(() => {
 		getGroups()
-	}, [globalUsername]);
+	}, [username]);
 
 	const showAlert = (message, severity) => {
-		setmessage(message);
+		setMessage(message);
 		setSeverity(severity);
 		setAlertOpen(true);
 	}
@@ -59,7 +62,7 @@ function HomePage() {
 			const response = await fetch(`${apiURL}/getGroups`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ globalUsername })
+				body: JSON.stringify({ username })
 			});
 		
 			const data = await response.json();
@@ -107,7 +110,7 @@ function HomePage() {
 			const response = await fetch(`${apiURL}/sendTransaction`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ globalUsername, finalNumber, selectedDate, reason, selectedGroup, comments })
+				body: JSON.stringify({ username, finalNumber, selectedDate, reason, selectedGroup, comments })
 			});
 
 			const data = await response.json();
@@ -131,9 +134,9 @@ function HomePage() {
 
 	return (
 		<>
-			<Nav />
+			<Nav username={username} />
 		
-			<Container component="main" maxWidth="sm"> {/* maxWidth=xs, sm, md, lg, xl */}
+			<Container component="main" maxWidth="sm">
 
 				<Paper elevation={10} sx={{ mt: 8, p: 4, borderRadius: 2 }}>
 				

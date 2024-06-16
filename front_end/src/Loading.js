@@ -2,7 +2,7 @@ import { useUser } from './UserContext';
 
 import { Backdrop, CircularProgress } from '@mui/material';
 
-function Loading() {
+const Loading = () => {
   const { loading } = useUser();
 
   return (
