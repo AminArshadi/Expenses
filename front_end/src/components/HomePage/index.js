@@ -1,46 +1,46 @@
-import Nav from './Nav.js';
-import Loading from './Loading.js';
-import { useUser } from './UserContext';
+import Nav from './../../sharedComponents/Nav'
+import Loading from './../../sharedComponents/Loading'
+import { useUser } from './../../UserContext'
 
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { DateTime } from 'luxon';
-import { TextField, Autocomplete, Button, MenuItem, Container, FormControl, Select, InputLabel, Paper, Snackbar, Alert } from '@mui/material';
-import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
-import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
+import React, { useState, useEffect } from 'react'
+import { useParams } from 'react-router-dom'
+import { DateTime } from 'luxon'
+import { TextField, Autocomplete, Button, MenuItem, Container, FormControl, Select, InputLabel, Paper, Snackbar, Alert } from '@mui/material'
+import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon'
+import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers'
 
 const HomePage = () => {
-	const { apiURL, setLoading } = useUser();
+	const { apiURL, setLoading } = useUser()
 
-	const { username } = useParams();
+	const { username } = useParams()
 
 	const [alertOpen, setAlertOpen] = useState(false)
 	const [message, setMessage] = useState('')
 	const [severity, setSeverity] = useState('success')
 
-	const [ groups, setGroups ] = useState([]);
+	const [ groups, setGroups ] = useState([])
 	
-	const [sign, setSign] = useState('+');
-	const [number, setNumber] = useState('');
-	const [selectedDate, setSelectedDate] = useState(DateTime.now());
-	const [reason, setReason] = useState(null);
+	const [sign, setSign] = useState('+')
+	const [number, setNumber] = useState('')
+	const [selectedDate, setSelectedDate] = useState(DateTime.now())
+	const [reason, setReason] = useState(null)
 	const reasons = [
 		{ value: "gas", label: 'Gas' },
 		{ value: "grocery", label: 'Grocery' },
 		{ value: "rent", label: 'Rent' },
 		{ value: "other", label: 'Other' },
 	]
-	const [selectedGroup, setSelectedGroup] = useState('');
-	const [comments, setComments] = useState('');
+	const [selectedGroup, setSelectedGroup] = useState('')
+	const [comments, setComments] = useState('')
 
 	useEffect(() => {
 		getGroups()
-	}, [username]);
+	}, [username])
 
 	const showAlert = (message, severity) => {
-		setMessage(message);
-		setSeverity(severity);
-		setAlertOpen(true);
+		setMessage(message)
+		setSeverity(severity)
+		setAlertOpen(true)
 	}
 
 	const hideAlert = () => {
@@ -49,11 +49,11 @@ const HomePage = () => {
 
 	const resetFields = () => {
 		setSign('+')
-		setNumber('');
-		setSelectedDate(DateTime.now());
-		setReason(null);
-		setSelectedGroup('');
-		setComments('');
+		setNumber('')
+		setSelectedDate(DateTime.now())
+		setReason(null)
+		setSelectedGroup('')
+		setComments('')
 	}
 
 	const getGroups = async () => {
@@ -63,72 +63,72 @@ const HomePage = () => {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ username })
-			});
+			})
 		
-			const data = await response.json();
+			const data = await response.json()
 		
 			if (response.ok && data.status === "success") {
 				setGroups(data.groups)
 			}
 			else {
-				showAlert(data.detail || 'An error occurred while sending information.', 'error');
+				showAlert(data.detail || 'An error occurred while sending information.', 'error')
 			}
 		}
 		catch (error) {
-			console.error('Network error:', error);
-			showAlert('Network error: Could not connect to server.', 'error');
+			console.error('Network error:', error)
+			showAlert('Network error: Could not connect to server.', 'error')
 		}
 		finally {
-			setLoading(false);
+			setLoading(false)
 		}
 	}
 
 	const handleSubmit = async (event) => {
-		event.preventDefault();
+		event.preventDefault()
 
 		// Validation for amount
 		if (!number) {
-			showAlert("Empty or incorrect amount format: only accepts numbers.", 'warning');
-			return;
+			showAlert("Empty or incorrect amount format: only accepts numbers.", 'warning')
+			return
 		}
 
 		// Validation for reason
 		if (!reason) {
-			showAlert("Select a reason.", 'warning');
-			return;
+			showAlert("Select a reason.", 'warning')
+			return
 		}
 
 		// Validation for selectedGroup
 		if (!selectedGroup) {
-			showAlert("Select a group.", 'warning');
-			return;
+			showAlert("Select a group.", 'warning')
+			return
 		}
 
 		setLoading(true)
-		let finalNumber = sign === "+" ? number : number * -1;
+		let finalNumber = sign === "+" ? number : number * -1
 		try {
 			const response = await fetch(`${apiURL}/sendTransaction`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ username, finalNumber, selectedDate, reason, selectedGroup, comments })
-			});
+			})
 
-			const data = await response.json();
+			const data = await response.json()
 
 			if (response.ok && data.status === "success") {
 				resetFields()
 				showAlert('Transaction submitted.', 'success')
 			}
 			else {
-				showAlert(data.detail || 'An error occurred while sending information.', 'error');
+				showAlert(data.detail || 'An error occurred while sending information.', 'error')
 			}
 		}
 		catch (error) {
-			console.error('Network error:', error);
-			showAlert('Network error: Could not connect to server.', 'error');
+			console.error('Network error:', error)
+			showAlert('Network error: Could not connect to server.', 'error')
 		}
 		finally {
-			setLoading(false);
+			setLoading(false)
 		}
 	}
 
@@ -229,7 +229,7 @@ const HomePage = () => {
 				</Alert>
 			</Snackbar>
 		</>
-	);
+	)
 }
 
-export default HomePage;
+export default HomePage

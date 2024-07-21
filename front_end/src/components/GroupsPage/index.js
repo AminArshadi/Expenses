@@ -1,41 +1,41 @@
-import Nav from './Nav.js';
-import Loading from './Loading.js';
-import { useUser } from './UserContext';
+import Nav from './../../sharedComponents/Nav'
+import Loading from './../../sharedComponents/Loading'
+import { useUser } from './../../UserContext'
 
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react'
+import { useParams } from 'react-router-dom'
 import { Container, TextField, Button, Box, Dialog, DialogTitle, DialogContent,
   DialogActions, Autocomplete, Paper, Snackbar, Alert, Table, TableBody, TableCell, TableContainer, TableHead, TableRow
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import GroupAddIcon from '@mui/icons-material/GroupAdd';
+} from '@mui/material'
+import AddIcon from '@mui/icons-material/Add'
+import GroupAddIcon from '@mui/icons-material/GroupAdd'
 
 const GroupsPage = () => {
-  const { apiURL, setLoading } = useUser();
+  const { apiURL, setLoading } = useUser()
 
-  const { username } = useParams();
+  const { username } = useParams()
 
   const [alertOpen, setAlertOpen] = useState(false)
   const [message, setMessage] = useState('')
   const [severity, setSeverity] = useState('success')
 
-  const [ usernames, setUsernames ] = useState([]);
-  const [ groups, setGroups ] = useState([]);
+  const [ usernames, setUsernames ] = useState([])
+  const [ groups, setGroups ] = useState([])
 
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false)
 
   const [groupName, setGroupName] = useState('')
-  const [selectedMembersUsernames, setSelectedMembersUsernames] = useState([]);
+  const [selectedMembersUsernames, setSelectedMembersUsernames] = useState([])
 
   useEffect(() => {
     getUsernames()
     getGroups()
-  }, [username]);
+  }, [username])
 
   const showAlert = (message, severity) => {
-    setMessage(message);
-    setSeverity(severity);
-    setAlertOpen(true);
+    setMessage(message)
+    setSeverity(severity)
+    setAlertOpen(true)
   }
 
   const hideAlert = () => {
@@ -48,7 +48,7 @@ const GroupsPage = () => {
 
   const handleCloseFab = () => {
     setGroupName('')
-    setSelectedMembersUsernames([]);
+    setSelectedMembersUsernames([])
     setOpen(false)
   }
 
@@ -56,7 +56,7 @@ const GroupsPage = () => {
     getUsernames()
     getGroups()
     setGroupName('')
-    setSelectedMembersUsernames([]);
+    setSelectedMembersUsernames([])
     setOpen(false)
   }
 
@@ -67,23 +67,23 @@ const GroupsPage = () => {
 				method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username })
-			});
+			})
 
-			const data = await response.json();
+			const data = await response.json()
 
 			if (response.ok && data.status === "success") {
 				setGroups(data.groups)
 			}
 			else {
-        showAlert(data.detail || 'An error occurred while sending information.', 'error');
+        showAlert(data.detail || 'An error occurred while sending information.', 'error')
 			}
 		}
 		catch (error) {
-			console.error('Network error:', error);
-      showAlert('Network error: Could not connect to server.', 'error');
+			console.error('Network error:', error)
+      showAlert('Network error: Could not connect to server.', 'error')
 		}
     finally {
-      setLoading(false);
+      setLoading(false)
     }
   }
 
@@ -93,23 +93,23 @@ const GroupsPage = () => {
 			const response = await fetch(`${apiURL}/getUsernames`, {
 				method: 'GET',
         headers: { 'Content-Type': 'application/json' }
-			});
+			})
 
-			const data = await response.json();
+			const data = await response.json()
 
 			if (response.ok && data.status === "success") {
 				setUsernames(data.usernames)
 			}
 			else {
-        showAlert(data.detail || 'An error occurred while sending information.', 'error');
+        showAlert(data.detail || 'An error occurred while sending information.', 'error')
 			}
 		}
 		catch (error) {
-			console.error('Network error:', error);
-      showAlert('Network error: Could not connect to server.', 'error');
+			console.error('Network error:', error)
+      showAlert('Network error: Could not connect to server.', 'error')
 		}
     finally {
-      setLoading(false);
+      setLoading(false)
     }
   }
 
@@ -118,14 +118,14 @@ const GroupsPage = () => {
 
     // Validation for groupName
 		if (!groupName) {
-      showAlert("Choose a name for your new group.", 'warning');
-			return;
+      showAlert("Choose a name for your new group.", 'warning')
+			return
 		}
 
     // Validation for selectedMembersUsernames
 		if (selectedMembersUsernames.length === 0) {
-      showAlert("Select the username of the people you want to add to the group.", 'warning');
-			return;
+      showAlert("Select the username of the people you want to add to the group.", 'warning')
+			return
 		}
 
     setLoading(true)
@@ -138,35 +138,35 @@ const GroupsPage = () => {
           admin_username: username,
           members_usernames: selectedMembersUsernames,
         })
-			});
+			})
 
-			const data = await response.json();
+			const data = await response.json()
 
 			if (response.ok && data.status === "success") {
         resetFields()
         showAlert(`Group ${groupName} is created.`, 'success')
 			}
 			else {
-        showAlert(data.detail || 'An error occurred while sending information.', 'error');
+        showAlert(data.detail || 'An error occurred while sending information.', 'error')
 			}
 		}
 		catch (error) {
-			console.error('Network error:', error);
-      showAlert('Network error: Could not connect to server.', 'error');
+			console.error('Network error:', error)
+      showAlert('Network error: Could not connect to server.', 'error')
 		}
     finally {
-      setLoading(false);
+      setLoading(false)
     }
   }
 
     const handleEditGroup = async (event, group) => {
-    event.preventDefault();
+    event.preventDefault()
     // Handle edit group functionality
-    console.log('Edit group', group);
+    console.log('Edit group', group)
   }
 
-  const handleLeaveGroup = async (event, group) => {
-    event.preventDefault();
+  const handleDeleteGroup = async (event, group) => {
+    event.preventDefault()
 
     setLoading(true)
     try {
@@ -177,24 +177,24 @@ const GroupsPage = () => {
           group_name: group,
           admin_username: username,
         })
-      });
+      })
 
-      const data = await response.json();
+      const data = await response.json()
 
       if (response.ok && data.status === "success") {
         getGroups()
         showAlert(data.msg, 'success')
       }
       else {
-        showAlert(data.msg || 'An error occurred while sending information.', 'error');
+        showAlert(data.msg || 'An error occurred while sending information.', 'error')
       }
     }
     catch (error) {
-      console.error('Network error:', error);
-      showAlert('Network error: Could not connect to server.', 'error');
+      console.error('Network error:', error)
+      showAlert('Network error: Could not connect to server.', 'error')
     }
     finally {
-      setLoading(false);
+      setLoading(false)
     }
   }
 
@@ -251,9 +251,9 @@ const GroupsPage = () => {
                           borderColor: 'red',
                           '&:hover': { backgroundColor: 'red', borderColor: 'white', color: 'white' }
                         }}
-                        onClick={(e) => handleLeaveGroup(e, group)}
+                        onClick={(e) => handleDeleteGroup(e, group)}
                       >
-                        Leave
+                        Delete
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -313,4 +313,4 @@ const GroupsPage = () => {
   )
 }
 
-export default GroupsPage;
+export default GroupsPage

@@ -1,9 +1,9 @@
-import { useUser } from './UserContext';
+import { useUser } from './../../UserContext'
 
-import { Backdrop, CircularProgress } from '@mui/material';
+import { Backdrop, CircularProgress } from '@mui/material'
 
 const Loading = () => {
-  const { loading } = useUser();
+  const { loading } = useUser()
 
   return (
     <Backdrop open={loading} sx={{ zIndex: (theme) => theme.zIndex.modal + 1 }}>
@@ -12,4 +12,4 @@ const Loading = () => {
   )
 }
 
-export default Loading;
+export default Loading

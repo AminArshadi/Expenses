@@ -1,12 +1,12 @@
-import './App.css';
+import './App.css'
 
-import LoginPage from './LoginPage.js';
-import SignupPage from './SignupPage.js';
-import HomePage from './HomePage.js';
-import GroupsPage from './GroupsPage.js';
-import ReportsPage from './ReportsPage.js';
+import LoginPage from './components/LoginPage'
+import SignupPage from './components/SignupPage'
+import HomePage from './components/HomePage'
+import GroupsPage from './components/GroupsPage'
+import ReportsPage from './components/ReportsPage'
 
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom"
 
 const App = () => {
   return (
@@ -22,7 +22,7 @@ const App = () => {
         </Routes>
       </BrowserRouter>
     </>
-  );
+  )
 }
 
-export default App;
+export default App

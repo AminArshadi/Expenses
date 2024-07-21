@@ -1,3 +1,5 @@
+from datetime import datetime
+
 def add_user_to_db(collection, firstName, lastName, email, username, password):
     user_record = {
         'firstName': firstName,
@@ -53,7 +55,7 @@ def delete_group_from_db(groups_collection, users_collection, group_name, admin_
     # Step 1: Remove the group from the groups_collection
     delete_result = groups_collection.delete_one({'group_name': group_name, 'admin_username': admin_username})
     if delete_result.deleted_count == 0:
-        return False, f"No group found with name '{group_name}' and admin '{admin_username}'"
+        return False, f"User {admin_username} is not the admin of group {group_name}. Only admin can delete the group."
     
     # Step 2: Remove the group name from the groups field of each user in the users_collection
     users_collection.update_many(
@@ -73,3 +75,27 @@ def delete_group_from_db(groups_collection, users_collection, group_name, admin_
 #         {'$addToSet': {'members_usernames': member_username}}
 #     )
 #     return
+
+def get_user_transactions_from_db(users_collection, transaction_collection, username):
+    
+    user_groups = users_collection.find(
+        {'username': username},
+        {'_id': 0, 'groups': 1}
+    )
+    
+    if not user_groups:
+        return False, None, None
+    
+    user_groups_list = list(user_groups)[0].get('groups', [])
+    
+    transactions = transaction_collection.find(
+        {'group': {'$in': user_groups_list}},
+        {'_id': 0}
+    ).sort('date', -1)
+    
+    transactions_list = list(transactions)
+    for transaction in transactions_list:
+        if isinstance(transaction['date'], datetime):
+            transaction['date'] = transaction['date'].isoformat()
+    
+    return True, user_groups_list, transactions_list

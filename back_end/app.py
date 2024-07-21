@@ -2,6 +2,7 @@ import os
 import uvicorn
 import jwt
 
+from pprint import pprint
 from datetime import datetime
 from typing import List
 from pymongo.mongo_client import MongoClient
@@ -17,6 +18,7 @@ from utils.authentication import (
     delete_group_from_db,
     get_groups_by_username_from_db,
     get_all_usernames_from_db,
+    get_user_transactions_from_db,
 )
 
 app = FastAPI()
@@ -105,12 +107,12 @@ async def add_user(transactionInfo: TransactionInfo):
 ######
 
 ### getGroups ###
-class AdminInfo(BaseModel):
+class UserInfo(BaseModel):
     username: str
     
 @app.post("/getGroups")
-async def get_groups(adminInfo: AdminInfo):
-    username = adminInfo.username
+async def get_groups(userInfo: UserInfo):
+    username = userInfo.username
     collection = db.users
     groups = get_groups_by_username_from_db(collection, username)
     if len(groups) == 1:
@@ -146,13 +148,30 @@ class GroupInfoDelete(BaseModel):
     admin_username: str
     
 @app.post("/groups/deleteGroup")
-async def add_group(groupInfo: GroupInfoDelete):
+async def delete_group(groupInfo: GroupInfoDelete):
     group_name, admin_username = groupInfo.group_name, groupInfo.admin_username
     groups_collection, users_collection = db.groups, db.users
     result, msg = delete_group_from_db(groups_collection, users_collection, group_name, admin_username)
     if not result:
-        return JSONResponse(content={"status": "failed", "msg": msg}, status_code=200)
+        return JSONResponse(content={"status": "failed", "msg": msg}, status_code=400)
     return JSONResponse(content={"status": "success", "msg": msg}, status_code=200)
+######
+
+### transaction ###
+@app.post("/transaction/getUserTransactions")
+async def get_user_transactions(userInfo: UserInfo):
+    username = userInfo.username
+    users_collection, transaction_collection = db.users, db.transaction
+    ok, user_groups_list, transactions_list = get_user_transactions_from_db(users_collection, transaction_collection, username)
+    if not ok:
+        return JSONResponse(content={"status": "failed"}, status_code=400)
+    content = {
+        'status': 'success',
+        'user_groups_list': user_groups_list,
+        'transactions_list': transactions_list,
+    }
+    # pprint(content)
+    return JSONResponse(content=content, status_code=200)
 ######
 
 if __name__ == "__main__":

@@ -1,5 +1,4 @@
 import React, { useState, createContext, useContext, useEffect } from 'react'
-import { jwtDecode } from 'jwt-decode';
 import Cookies from 'js-cookie';
 
 const UserContext = createContext(null)

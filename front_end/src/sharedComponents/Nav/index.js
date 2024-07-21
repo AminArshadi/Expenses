@@ -1,6 +1,6 @@
-import './Nav.scss';
+import './styles.scss';
 
-import { useUser } from './UserContext';
+import { useUser } from './../../UserContext';
 
 import { Link, useLocation } from 'react-router-dom';
 

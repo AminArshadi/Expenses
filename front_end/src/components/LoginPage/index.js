@@ -1,31 +1,31 @@
-import Loading from './Loading.js';
-import { useUser } from './UserContext';
+import Loading from './../../sharedComponents/Loading'
+import { useUser } from './../../UserContext'
 
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Container, TextField, Button, Typography, Box, IconButton, Paper, Snackbar, Alert } from '@mui/material';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
+import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Container, TextField, Button, Typography, Box, IconButton, Paper, Snackbar, Alert } from '@mui/material'
+import { Visibility, VisibilityOff } from '@mui/icons-material'
 
 const LoginPage = () => {
-  const navigate = useNavigate();
-  const { setToken, apiURL, setLoading } = useUser();
+  const navigate = useNavigate()
+  const { setToken, apiURL, setLoading } = useUser()
 
   const [alertOpen, setAlertOpen] = useState(false)
-  const [message, setmessage] = useState('')
+  const [message, setMessage] = useState('')
   const [severity, setSeverity] = useState('success')
 
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
 
   useEffect(() => {
     setToken('')
-  }, []);
+  }, [])
 
   const showAlert = (message, severity) => {
-    setmessage(message);
-    setSeverity(severity);
-    setAlertOpen(true);
+    setMessage(message)
+    setSeverity(severity)
+    setAlertOpen(true)
   }
 
   const hideAlert = () => {
@@ -33,18 +33,18 @@ const LoginPage = () => {
   }
 
   const handleLogin = async (event) => {
-    event.preventDefault();
+    event.preventDefault()
   
     // Validate username
     if (!username.trim()) {
-      showAlert("Username is required.", 'warning');
-      return;
+      showAlert("Username is required.", 'warning')
+      return
     }
   
     // Validate password
     if (!password) {
-      showAlert("Password is required.", 'warning');
-      return;
+      showAlert("Password is required.", 'warning')
+      return
     }
     
     setLoading(true)
@@ -53,38 +53,38 @@ const LoginPage = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
-      });
+      })
 
-      const data = await response.json();
+      const data = await response.json()
 
       if (response.ok && data.status === "success") {
         setToken(data.token)
         navigate(`/home/${username}`)
       }
       else {
-        showAlert(data.detail || 'An error occurred during login.', 'error');
+        showAlert(data.detail || 'An error occurred during login.', 'error')
       }
     }
     catch (error) {
-      showAlert('Network error: Could not connect to server.', 'error');
+      showAlert('Network error: Could not connect to server.', 'error')
     }
     finally {
-			setLoading(false);
+			setLoading(false)
 		}
-  };
+  }
 
   const handleSignUp = (event) => {
-    event.preventDefault();
-    navigate('/signup');
+    event.preventDefault()
+    navigate('/signup')
   }
 
   const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
+    setShowPassword(!showPassword)
   }
 
   return (
     <>
-      <Container component="main" maxWidth="xs">
+      <Container component="main" maxWidth="sm">
 
         <Paper elevation={10} sx={{ mt: 8, p: 4, borderRadius: 2 }}>
 
@@ -153,4 +153,4 @@ const LoginPage = () => {
   )
 }
 
-export default LoginPage;
+export default LoginPage
