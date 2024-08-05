@@ -1,4 +1,4 @@
-import { Box, TextField, Autocomplete, Drawer } from '@mui/material'
+import { Box, TextField, Autocomplete, Drawer, Divider } from '@mui/material'
 import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon'
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers'
 import { Button, ButtonGroup } from '@blueprintjs/core'
@@ -6,8 +6,10 @@ import { Button, ButtonGroup } from '@blueprintjs/core'
 const ReportsPage = ({
   filterDrawerOpen,
   setFilterDrawerOpen,
+  defaultFromDate,
   selectedFromDate,
   setSelectedFromDate,
+  defaultToDate,
   selectedToDate,
   setSelectedToDate,
   selectedAmountLessThan,
@@ -17,22 +19,43 @@ const ReportsPage = ({
   userGroups,
   selectedUserGroup,
   setSelectedUserGroup,
+  getUserTransactions
 }) => {
 
+  const handleApplyFilters = () => {
+    getUserTransactions()
+    setFilterDrawerOpen(false)
+  }
+
   const handleResetAllFilters = () => {
-    setSelectedFromDate(null)
-    setSelectedToDate(null)
+    setSelectedFromDate(defaultFromDate)
+    setSelectedToDate(defaultToDate)
     setSelectedAmountLessThan(null)
     setSelectedAmountGreaterThan(null)
     setSelectedUserGroup('All')
-    setFilterDrawerOpen(false)
   }
 
   return (
     <Drawer anchor='right' open={filterDrawerOpen} onClose={() => setFilterDrawerOpen(false)}>
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100vh' }}>
+      <Box  component= 'h1' sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        Filters
+      </Box>
 
-        <Box sx={{ display: 'flex', flexDirection: 'row', p: 2, mb: 2 }}>
+      <Divider />
+
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100vh', mt: 4 }}>
+        <Autocomplete
+          options={userGroups}
+          value={selectedUserGroup}
+          onChange={(event, newValue) => { newValue ? setSelectedUserGroup(newValue) : setSelectedUserGroup('All') }}
+          getOptionLabel={(option) => option}
+          renderInput={(params) => (
+            <TextField {...params} label="Select group" variant="outlined" />
+          )}
+          sx={{ width: 472 }}
+        />
+
+        <Box sx={{ display: 'flex', flexDirection: 'row', p: 2, mt: 2 }}>
           <LocalizationProvider dateAdapter={AdapterLuxon}>
             <DatePicker
               label="From"
@@ -54,9 +77,9 @@ const ReportsPage = ({
           </LocalizationProvider>
         </Box>
 
-        <Box sx={{ display: 'flex', flexDirection: 'row', mb: 4, width: 504, height: 88, alignItems: 'center', justifyContent: 'center' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'row', width: 504, height: 88, alignItems: 'center', justifyContent: 'center' }}>
           <TextField
-            label="Amount Greater Than"
+            label="Amount greater than..."
             type="number"
             variant="outlined"
             placeholder='0.0 CAD'
@@ -68,7 +91,7 @@ const ReportsPage = ({
           <div style={{ width: 10 }} />
 
           <TextField
-            label="Amount Less Than"
+            label="Amount less than..."
             type="number"
             variant="outlined"
             placeholder='0.0 CAD'
@@ -77,31 +100,25 @@ const ReportsPage = ({
             sx={{ width: 231, height: 56 }}
           />
         </Box>
-
-        <Autocomplete
-          options={userGroups}
-          value={selectedUserGroup}
-          onChange={(event, newValue) => { newValue ? setSelectedUserGroup(newValue) : setSelectedUserGroup('All') }}
-          getOptionLabel={(option) => option}
-          renderInput={(params) => (
-            <TextField {...params} label="Select group" variant="outlined" />
-          )}
-          sx={{ width: 472 }}
-        />
       </Box>
 
-      <ButtonGroup fill large>
-        <Button
-          intent='danger'
-          text='Reset Filters'
-          onClick={handleResetAllFilters}
-        />
+      <ButtonGroup fill large style={{ display: 'flex', flexDirection: 'column', height: '110px', padding: '10px' }}>
         <Button
           intent='primary'
           text='Apply'
+          icon='filter-open'
+          onClick={handleApplyFilters}
+          style={{ borderRadius: '20px' }}
+        />
+
+        <Button
+          intent='danger'
+          text='Reset'
+          icon='filter-remove'
+          onClick={handleResetAllFilters}
+          style={{ borderRadius: '20px', marginTop: '10px' }}
         />
       </ButtonGroup>
-
     </Drawer>
   )
 }

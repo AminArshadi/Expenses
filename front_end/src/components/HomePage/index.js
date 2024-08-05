@@ -21,7 +21,7 @@ const HomePage = () => {
 	const [ groups, setGroups ] = useState([])
 	
 	const [sign, setSign] = useState('+')
-	const [number, setNumber] = useState('')
+	const [amount, setAmount] = useState(null)
 	const [selectedDate, setSelectedDate] = useState(DateTime.now())
 	const [reason, setReason] = useState(null)
 	const reasons = [
@@ -49,7 +49,7 @@ const HomePage = () => {
 
 	const resetFields = () => {
 		setSign('+')
-		setNumber('')
+		setAmount('')
 		setSelectedDate(DateTime.now())
 		setReason(null)
 		setSelectedGroup('')
@@ -86,26 +86,23 @@ const HomePage = () => {
 	const handleSubmit = async (event) => {
 		event.preventDefault()
 
-		// Validation for amount
-		if (!number) {
-			showAlert("Empty or incorrect amount format: only accepts numbers.", 'warning')
+		if (!amount || (amount == 0)) {
+			showAlert("Empty or incorrect amount format: only accepts non-zero numbers.", 'warning')
 			return
 		}
 
-		// Validation for reason
 		if (!reason) {
 			showAlert("Select a reason.", 'warning')
 			return
 		}
 
-		// Validation for selectedGroup
 		if (!selectedGroup) {
 			showAlert("Select a group.", 'warning')
 			return
 		}
 
 		setLoading(true)
-		let finalNumber = sign === "+" ? number : number * -1
+		let finalNumber = sign === "+" ? amount : amount * -1
 		try {
 			const response = await fetch(`${apiURL}/sendTransaction`, {
 				method: 'POST',
@@ -163,8 +160,8 @@ const HomePage = () => {
 							type="number"
 							variant="outlined"
 							placeholder='0.0 CAD'
-							value={number}
-							onChange={e => setNumber(e.target.value)}
+							value={amount}
+							onChange={e => setAmount(e.target.value)}
 						/>
 
 						<LocalizationProvider dateAdapter={AdapterLuxon}>

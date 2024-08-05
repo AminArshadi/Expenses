@@ -11,6 +11,7 @@ import { CompactTable } from '@table-library/react-table-library/compact'
 import { useTheme } from '@table-library/react-table-library/theme'
 import { DEFAULT_OPTIONS, getTheme } from '@table-library/react-table-library/material-ui'
 import { Button, ButtonGroup } from '@blueprintjs/core'
+import { DateTime } from 'luxon'
 
 const ReportsPage = () => {
   const { apiURL, setLoading } = useUser()
@@ -19,22 +20,25 @@ const ReportsPage = () => {
 
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false)
 
-  const [selectedFromDate, setSelectedFromDate] = useState(null)
-  const [selectedToDate, setSelectedToDate] = useState(null)
-
-  const [selectedAmountLessThan, setSelectedAmountLessThan] = useState(null)
-  const [selectedAmountGreaterThan, setSelectedAmountGreaterThan] = useState(null)
-
   const [userGroups, setUserGroups] = useState([])
   const [selectedUserGroup, setSelectedUserGroup] = useState('All')
+
+  const defaultFromDate = DateTime.now().minus({ months: 3 })
+  const [selectedFromDate, setSelectedFromDate] = useState(defaultFromDate)
+  const defaultToDate = DateTime.now()
+  const [selectedToDate, setSelectedToDate] = useState(defaultToDate)
+
+  const [selectedAmountGreaterThan, setSelectedAmountGreaterThan] = useState(null)
+  const [selectedAmountLessThan, setSelectedAmountLessThan] = useState(null)
   
   const [userTransactions, setUserTransactions] = useState([])
-  const [filteredUserTransactionsOnSelectedUserGroup, setFilteredUserTransactionsOnSelectedUserGroup] = useState([])
 
   const [searchQuery, setSearchQuery] = useState('')
-  const filteredUserTransactions = filteredUserTransactionsOnSelectedUserGroup.filter(row => {
-    return Object.values(row).some(value => String(value).toLowerCase().includes(searchQuery.toLowerCase()))
-  })
+  const filteredUserTransactions = userTransactions
+    .filter(row => (selectedUserGroup && selectedUserGroup !== 'All') ? String(row.group) === selectedUserGroup : true)
+    .filter(row => (selectedAmountGreaterThan) ? row.amount > selectedAmountGreaterThan : true)
+    .filter(row => (selectedAmountLessThan) ? row.amount < selectedAmountLessThan : true)
+    .filter(row => Object.values(row).some(value => String(value).toLowerCase().includes(searchQuery.toLowerCase())))
 
   const [alertOpen, setAlertOpen] = useState(false)
   const [message, setMessage] = useState('')
@@ -43,17 +47,6 @@ const ReportsPage = () => {
   useEffect (() => {
     getUserTransactions()
   }, [])
-
-  useEffect(() => {
-    if (selectedUserGroup && selectedUserGroup !== 'All') {
-      setFilteredUserTransactionsOnSelectedUserGroup(userTransactions.filter(
-        row => String(row.group) === selectedUserGroup
-      ))
-    }
-    else {
-      setFilteredUserTransactionsOnSelectedUserGroup(userTransactions)
-    }
-  }, [selectedUserGroup])
 
   const showAlert = (message, severity) => {
     setMessage(message)
@@ -71,7 +64,11 @@ const ReportsPage = () => {
       const response = await fetch(`${apiURL}/transaction/getUserTransactions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username })
+        body: JSON.stringify({
+          username: username,
+          selectedFromDate: selectedFromDate,
+          selectedToDate: selectedToDate
+        })
       })
 
       const data = await response.json()
@@ -83,7 +80,6 @@ const ReportsPage = () => {
           date: new Date(item.date),
         }))
         setUserTransactions(format_transactions)
-        setFilteredUserTransactionsOnSelectedUserGroup(format_transactions)
       }
       else {
         showAlert('An error occurred while sending information.', 'error')
@@ -99,14 +95,15 @@ const ReportsPage = () => {
 
   const handleDownload = () => {
     const csvData = [
-      ["Year", "Month", "Day", "Time", "Amount", "Reason", "Group", "Comments"],
+      ["Year", "Month", "Day", "Time", "Amount", "Reason", "User", "Group", "Comments"],
       ...filteredUserTransactions.map(item => [
-        item.date.getFullYear(),
-        item.date.getMonth() + 1,
-        item.date.getDate(),
-        `${item.date.getHours()}:${item.date.getMinutes()}:${item.date.getSeconds()}`,
+        new Date(item.date).toLocaleDateString('en-US', { year: 'numeric' }),
+        new Date(item.date).toLocaleDateString('en-US', { month: 'numeric' }),
+        new Date(item.date).toLocaleDateString('en-US', { day: 'numeric' }),
+        new Date(item.date).toLocaleTimeString(),
         item.amount,
         item.reason,
+        item.username,
         item.group,
         item.comments
       ])
@@ -128,33 +125,61 @@ const ReportsPage = () => {
   const theme = useTheme(materialTheme)
   const columns = [
     {
-      label: 'Year',
-      renderCell: (item) => {
-        return `${item.date.getFullYear()}`
-      },
-    },
-    {
-      label: 'Month',
-      renderCell: (item) => {
-        return `${item.date.getMonth() + 1}`
-      },
-    },
-    {
-      label: 'Day',
-      renderCell: (item) => {
-        return `${item.date.getDate()}`
-      },
+      label: 'Date',
+      renderCell: (item) => (
+        <div style={{ maxWidth: '200px', overflow: 'auto' }}>
+          {new Date(item.date).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})}
+        </div>
+      ),
     },
     {
       label: 'Time',
-      renderCell: (item) => {
-        return `${item.date.getHours()}:${item.date.getMinutes()}:${item.date.getSeconds()}`
-      },
+      renderCell: (item) => (
+        <div style={{ maxWidth: '200px', overflow: 'auto' }}>
+          {new Date(item.date).toLocaleTimeString()}
+        </div>
+      ),
     },
-    { label: 'Amount', renderCell: (item) => item.amount },
-    { label: 'Reason', renderCell: (item) => item.reason },
-    { label: 'Group', renderCell: (item) => item.group },
-    { label: 'Comments', renderCell: (item) => item.comments },
+    {
+      label: 'Amount',
+      renderCell: (item) => (
+        <div style={{ maxWidth: '200px', overflow: 'auto', color: item.amount < 0 ? 'red' : 'green' }}>
+          {item.amount > 0 ? `+${item.amount}` : item.amount}
+        </div>
+      ),
+    },
+    {
+      label: 'Reason',
+      renderCell: (item) => (
+        <div style={{ maxWidth: '200px', overflow: 'auto' }}>
+          {item.reason}
+        </div>
+      ),
+    },
+    {
+      label: 'User',
+      renderCell: (item) => (
+        <div style={{ maxWidth: '200px', overflow: 'auto' }}>
+          {item.username}
+        </div>
+      ),
+    },
+    {
+      label: 'Group',
+      renderCell: (item) => (
+        <div style={{ maxWidth: '200px', overflow: 'auto' }}>
+          {item.group}
+        </div>
+      ),
+    },
+    {
+      label: 'Comments',
+      renderCell: (item) => (
+        <div style={{ maxWidth: '200px', overflow: 'auto' }}>
+          {item.comments}
+        </div>
+      ),
+    },
   ]
 
   return (
@@ -166,8 +191,10 @@ const ReportsPage = () => {
       <FiltersDrawer
         filterDrawerOpen={filterDrawerOpen}
         setFilterDrawerOpen={setFilterDrawerOpen}
+        defaultFromDate={defaultFromDate}
         selectedFromDate={selectedFromDate}
         setSelectedFromDate={setSelectedFromDate}
+        defaultToDate={defaultToDate}
         selectedToDate={selectedToDate}
         setSelectedToDate={setSelectedToDate}
         selectedAmountLessThan={selectedAmountLessThan}
@@ -177,6 +204,7 @@ const ReportsPage = () => {
         userGroups={userGroups}
         selectedUserGroup={selectedUserGroup}
         setSelectedUserGroup={setSelectedUserGroup}
+        getUserTransactions={getUserTransactions}
       />
 
       <Snackbar open={alertOpen} autoHideDuration={6000} onClose={hideAlert} anchorOrigin={{ vertical: 'top', horizontal: 'right' }}>
@@ -186,7 +214,7 @@ const ReportsPage = () => {
       </Snackbar>
 
       <Container component="main" maxWidth="md">
-        <Paper elevation={10} sx={{ position: 'absolute', top: 90, left: 20, right: 20, borderRadius: 2, boxShadow: 3, p: 2 }}>
+        <Paper elevation={10} sx={{ position: 'absolute', top: 90, left: 20, right: 20, bottom: 20, borderRadius: 2, boxShadow: 3, p: 2 }}>
           <Box sx={{ display: 'flex', flexDirection: 'row', mb: 1, justifyContent: 'space-between' }}>
             <TextField
               size='small'
@@ -222,7 +250,13 @@ const ReportsPage = () => {
             </ButtonGroup>
           </Box>
 
-          <CompactTable columns={columns} data={data} theme={theme} />
+          <Box sx={{ position: 'absolute', top: 70, left: 20, right: 20, bottom: 20, overflow: 'auto', border: '1.5px solid lightgray', borderRadius: 2 }}>
+            <CompactTable
+              columns={columns}
+              data={data}
+              theme={theme}
+            />
+          </Box>
         </Paper>
       </Container>
     </>

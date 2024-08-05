@@ -76,7 +76,9 @@ def delete_group_from_db(groups_collection, users_collection, group_name, admin_
 #     )
 #     return
 
-def get_user_transactions_from_db(users_collection, transaction_collection, username):
+def get_user_transactions_from_db(users_collection, transaction_collection, username, from_date, to_date):
+    
+    print(type(from_date), to_date)
     
     user_groups = users_collection.find(
         {'username': username},
@@ -89,7 +91,10 @@ def get_user_transactions_from_db(users_collection, transaction_collection, user
     user_groups_list = list(user_groups)[0].get('groups', [])
     
     transactions = transaction_collection.find(
-        {'group': {'$in': user_groups_list}},
+        {
+            'group': {'$in': user_groups_list},
+            'date': {'$gte': from_date, '$lte': to_date}
+        },
         {'_id': 0}
     ).sort('date', -1)
     

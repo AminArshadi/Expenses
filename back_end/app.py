@@ -158,11 +158,16 @@ async def delete_group(groupInfo: GroupInfoDelete):
 ######
 
 ### transaction ###
+class TransactionFilterInfo(BaseModel):
+    username: str
+    selectedFromDate: datetime
+    selectedToDate: datetime
+    
 @app.post("/transaction/getUserTransactions")
-async def get_user_transactions(userInfo: UserInfo):
-    username = userInfo.username
+async def get_user_transactions(transactionFilterInfo: TransactionFilterInfo):
+    username, from_date, to_date = transactionFilterInfo.username, transactionFilterInfo.selectedFromDate, transactionFilterInfo.selectedToDate
     users_collection, transaction_collection = db.users, db.transaction
-    ok, user_groups_list, transactions_list = get_user_transactions_from_db(users_collection, transaction_collection, username)
+    ok, user_groups_list, transactions_list = get_user_transactions_from_db(users_collection, transaction_collection, username, from_date, to_date)
     if not ok:
         return JSONResponse(content={"status": "failed"}, status_code=400)
     content = {
